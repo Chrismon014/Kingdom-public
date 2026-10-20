@@ -1,45 +1,292 @@
--- Requerir la librería (si está en tu proyecto) o cargarla por URL/Script local
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Chrismon014/Kingdom-public/refs/heads/main/libreria"))() 
--- O si es un ModuleScript local: local Library = require(path.to.KingdomPublic)
+-- =========================================================================
+-- MÓDULO DE REBIRTHS Y CALCULADORA (Integrado)
+-- =========================================================================
+local function SetupRebirthSection(AutoFarmTab, window)
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
 
--- 1. Crear la Ventana Principal
-local Window = Library:CreateWindow({
-    Title = "Kingdom Public"
-})
+    -- 1. Carpeta Visual / Contenedor para Rebirths
+    local RebirthFolder = AutoFarmTab:AddFolder("OP Rebirth")
+    local player = game.Players.LocalPlayer
+    local leaderstats = player:WaitForChild("leaderstats")
+    local rebirthsStat = leaderstats:WaitForChild("Rebirths")
+    
+    local startTime = tick()
+    local sessionRebirths = rebirthsStat.Value
 
--- 2. Crear las Pestañas que quieras desde tu código principal
-local FarmTab = Window:CreateTab("Auto Farm")
-local CombatTab = Window:CreateTab("Combat")
-local MiscTab = Window:CreateTab("Misc")
+    local timeLabel = RebirthFolder:AddLabel("Time")
+    timeLabel.TextSize = 24
+    timeLabel.Font = Enum.Font.PatrickHand
 
--- 3. Añadir Contenido a la Pestaña "Auto Farm"
-FarmTab:AddToggle({
-    Name = "Auto Strength",
-    Default = false
-}, function(state)
-    print("Auto Strength estado:", state)
-end)
+    local stopwatchLabel = RebirthFolder:AddLabel("0d 0h 0m 0s")
+    stopwatchLabel.TextSize = 20
+    stopwatchLabel.Font = Enum.Font.PatrickHand
 
-FarmTab:AddToggle({
-    Name = "Auto Rebirth",
-    Default = false
-}, function(state)
-    print("Auto Rebirth estado:", state)
-end)
+    RebirthFolder:AddLabel("").TextSize = 10
 
-FarmTab:AddButton("Teleport a Zona de Entrenamiento", function()
-    print("Teletransportando a zona de entrenamiento...")
-end)
+    local gainedLabel = RebirthFolder:AddLabel("Gained Rebirths: 0")
+    gainedLabel.TextSize = 16
+    gainedLabel.Font = Enum.Font.PatrickHand
 
--- 4. Añadir Contenido a la Pestaña "Combat"
-CombatTab:AddToggle({
-    Name = "Kill Aura",
-    Default = false
-}, function(state)
-    print("Kill Aura estado:", state)
-end)
+    task.spawn(function()
+        while task.wait(1) do
+            local elapsed = tick() - startTime
+            local days = math.floor(elapsed / 86400)
+            local hours = math.floor((elapsed % 86400) / 3600)
+            local minutes = math.floor((elapsed % 3600) / 60)
+            local seconds = math.floor(elapsed % 60)
+            stopwatchLabel.Text = string.format("%dd %dh %dm %ds", days, hours, minutes, seconds)
+            
+            local gainedRebirths = rebirthsStat.Value - sessionRebirths
+            gainedLabel.Text = "Gained Rebirths: " .. tostring(gainedRebirths)
+        end
+    end)
 
--- 5. Añadir Contenido a la Pestaña "Misc"
-MiscTab:AddButton("Reducir Lag (Anti Lag)", function()
-    print("Optimizando gráficos e interfaz...")
-end)
+    -- Fast Rebirths
+    RebirthFolder:AddSwitch("Fast Rebirths", function(state)
+        getgenv().AutoFarming = state
+        if state then
+            task.spawn(function()
+                local a = ReplicatedStorage
+                local c = LocalPlayer
+                
+                local function equipPetByName(name)
+                    local folderPets = c:FindFirstChild("petsFolder")
+                    if not folderPets then return end
+                    for _, folder in pairs(folderPets:GetChildren()) do
+                        if folder:IsA("Folder") then
+                            for _, pet in pairs(folder:GetChildren()) do
+                                if pet.Name == name then
+                                    a.rEvents.equipPetEvent:FireServer("equipPet", pet)
+                                end
+                            end
+                        end
+                    end
+                end
+
+                local function unequipAllPets()
+                    local f = c:FindFirstChild("petsFolder")
+                    if not f then return end
+                    for _, folder in pairs(f:GetChildren()) do
+                        if folder:IsA("Folder") then
+                            for _, pet in pairs(folder:GetChildren()) do
+                                a.rEvents.equipPetEvent:FireServer("unequipPet", pet)
+                            end
+                        end
+                    end
+                    task.wait(0.1)
+                end
+
+                local function getGoldenRebirthCount()
+                    local g = c:FindFirstChild("ultimatesFolder")
+                    if g and g:FindFirstChild("Golden Rebirth") then
+                        return g["Golden Rebirth"].Value
+                    end
+                    return 0
+                end
+
+                local function getStrengthRequiredForRebirth()
+                    local rebirths = c.leaderstats.Rebirths.Value
+                    local baseStrength = 10000 + (5000 * rebirths)
+                    local golden = getGoldenRebirthCount()
+                    if golden >= 1 and golden <= 5 then
+                        baseStrength = baseStrength * (1 - golden * 0.1)
+                    end
+                    return math.floor(baseStrength)
+                end
+
+                while getgenv().AutoFarming do
+                    local requiredStrength = getStrengthRequiredForRebirth()
+                    unequipAllPets()
+                    equipPetByName("Swift Samurai")
+                    
+                    while c.leaderstats.Strength.Value < requiredStrength and getgenv().AutoFarming do
+                        for _ = 1, 10 do
+                            c.muscleEvent:FireServer("rep")
+                        end
+                        task.wait()
+                    end
+                    
+                    if getgenv().AutoFarming then
+                        unequipAllPets()
+                        equipPetByName("Tribal Overlord")
+                        local oldRebirths = c.leaderstats.Rebirths.Value
+                        repeat
+                            a.rEvents.rebirthRemote:InvokeServer("rebirthRequest")
+                            task.wait(0.1)
+                        until c.leaderstats.Rebirths.Value > oldRebirths or not getgenv().AutoFarming
+                    end
+                    task.wait()
+                end
+            end)
+        end
+    end)
+
+    -- Lock Position
+    RebirthFolder:AddSwitch("Lock Position", function(Value)
+        if Value then
+            local currentPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+            getgenv().posLock = game:GetService("RunService").Heartbeat:Connect(function()
+                if game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = currentPos
+                end
+            end)
+        else
+            if getgenv().posLock then
+                getgenv().posLock:Disconnect()
+                getgenv().posLock = nil
+            end
+        end
+    end)
+
+    -- Subcarpeta / Pestaña de Rebirths (Objetivos e Infinitos)
+    local rebirthsFolderMenu = AutoFarmTab:AddFolder("Rebirths Management")
+    local targetRebirthValue = 0
+
+    rebirthsFolderMenu:AddTextBox("Rebirth Target", function(text)
+        local newValue = tonumber(text)
+        if newValue and newValue > 0 then
+            targetRebirthValue = newValue
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Objetivo Actualizado",
+                Text = "Nuevo objetivo: " .. tostring(targetRebirthValue) .. " renacimientos",
+                Duration = 0
+            })
+        else
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Entrada Inválida",
+                Text = "Por favor ingresa un número válido mayor que 0",
+                Duration = 0
+            })
+        end
+    end)
+
+    local infiniteSwitch
+    local targetSwitch = rebirthsFolderMenu:AddSwitch("Auto Rebirth Target", function(bool)
+        _G.targetRebirthActive = bool
+        if bool then
+            if _G.infiniteRebirthActive and infiniteSwitch then
+                infiniteSwitch:Set(false)
+                _G.infiniteRebirthActive = false
+            end
+            spawn(function()
+                while _G.targetRebirthActive and wait(0.1) do
+                    local currentRebirths = game.Players.LocalPlayer.leaderstats.Rebirths.Value
+                    if currentRebirths >= targetRebirthValue then
+                        targetSwitch:Set(false)
+                        _G.targetRebirthActive = false
+                        game:GetService("StarterGui"):SetCore("SendNotification", {
+                            Title = "¡Objetivo Alcanzado!",
+                            Text = "Has alcanzado " .. tostring(targetRebirthValue) .. " renacimientos",
+                            Duration = 5
+                        })
+                        break
+                    end
+                    game:GetService("ReplicatedStorage").rEvents.rebirthRemote:InvokeServer("rebirthRequest")
+                end
+            end)
+        end
+    end, "Renacimiento automático hasta alcanzar el objetivo")
+
+    infiniteSwitch = rebirthsFolderMenu:AddSwitch("Auto Rebirth (Infinite)", function(bool)
+        _G.infiniteRebirthActive = bool
+        if bool then
+            if _G.targetRebirthActive and targetSwitch then
+                targetSwitch:Set(false)
+                _G.targetRebirthActive = false
+            end
+            spawn(function()
+                while _G.infiniteRebirthActive and wait(0.1) do
+                    game:GetService("ReplicatedStorage").rEvents.rebirthRemote:InvokeServer("rebirthRequest")
+                end
+            end)
+        end
+    end, "Renacimiento continuo sin parar")
+
+    -- 2. Pestaña de Calculadora / Stats de Daño y Durabilidad de Packs
+    local Calculadora = window:AddTab("Calculator")
+    local baseStrength = 0
+    local resultadoLabelsDamage = {}
+    local FolderDamage = Calculadora:AddFolder("Pack Damage Calculator")
+
+    FolderDamage:AddTextBox("Pack Damage", function(text)
+        local unidades = { ["T"] = 1e12, ["Q"] = 1e15, ["B"] = 1e9 }
+        text = text:upper()
+        for u, m in pairs(unidades) do
+            if text:find(u) then
+                local num = tonumber(text:match("(%d+%.?%d*)"))
+                if num then baseStrength = num * m return end
+            end
+        end
+        baseStrength = tonumber(text:match("(%d+%.?%d*)")) or 0
+    end)
+
+    local mensajeLabelDamage = FolderDamage:AddLabel("")
+    for i = 1, 8 do
+        resultadoLabelsDamage[i] = FolderDamage:AddLabel(string.format("%d pack(s): -", i))
+    end
+
+    FolderDamage:AddButton("Calculate Damage", function()
+        if baseStrength <= 0 then
+            mensajeLabelDamage.Text = "Enter a valid value."
+            for i = 1, 8 do resultadoLabelsDamage[i].Text = string.format("%d pack(s): -", i) end
+            return
+        end
+        mensajeLabelDamage.Text = ""
+        local danoAjustado = baseStrength * 0.10
+        local incremento = 0.335
+        for pack = 1, 8 do
+            local mult = 1 + (pack * incremento)
+            local valor = danoAjustado * mult
+            local disp
+            if valor >= 1e15 then disp = string.format("%.3f Qa", valor / 1e15)
+            elseif valor >= 1e12 then disp = string.format("%.2f T", valor / 1e12)
+            elseif valor >= 1e9 then disp = string.format("%.2f B", valor / 1e9)
+            else disp = tostring(math.floor(valor)) end
+            resultadoLabelsDamage[pack].Text = string.format("%d pack(s): %s", pack, disp)
+        end
+    end)
+
+    local baseDurabilidad = 0
+    local resultadoLabelsDurabilidad = {}
+    local FolderDurabilidad = Calculadora:AddFolder("Pack Durability Calculator")
+
+    FolderDurabilidad:AddTextBox("Durability", function(text)
+        local unidades = { ["T"] = 1e12, ["Q"] = 1e15, ["B"] = 1e9 }
+        text = text:upper()
+        for u, m in pairs(unidades) do
+            if text:find(u) then
+                local num = tonumber(text:match("(%d+%.?%d*)"))
+                if num then baseDurabilidad = num * m return end
+            end
+        end
+        baseDurabilidad = tonumber(text:match("(%d+%.?%d*)")) or 0
+    end)
+
+    local mensajeLabelDurabilidad = FolderDurabilidad:AddLabel("")
+    for i = 1, 8 do
+        resultadoLabelsDurabilidad[i] = FolderDurabilidad:AddLabel(string.format("%d pack(s): -", i))
+    end
+
+    FolderDurabilidad:AddButton("Calculate Durability", function()
+        if baseDurabilidad <= 0 then
+            mensajeLabelDurabilidad.Text = "Enter a valid value."
+            for i = 1, 8 do resultadoLabelsDurabilidad[i].Text = string.format("%d pack(s): -", i) end
+            return
+        end
+        mensajeLabelDurabilidad.Text = ""
+        local incremento = 0.335
+        local adicional = 1.5
+        for pack = 1, 8 do
+            local mult = 1 + (pack * incremento)
+            local valor = baseDurabilidad * mult * adicional
+            local disp
+            if valor >= 1e15 then disp = string.format("%.3f Qa", valor / 1e15)
+            elseif valor >= 1e12 then disp = string.format("%.2f T", valor / 1e12)
+            elseif valor >= 1e9 then disp = string.format("%.2f B", valor / 1e9)
+            else disp = tostring(math.floor(valor)) end
+            resultadoLabelsDurabilidad[pack].Text = string.format("%d pack(s): %s", pack, disp)
+        end
+    end)
+end
