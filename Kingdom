@@ -1,5 +1,5 @@
 -- Requerir la librería (si está en tu proyecto) o cargarla por URL/Script local
-local Library = loadstring(game:HttpGet("TU_LINK_DE_RAW_GITHUB_AQUI"))() 
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Chrismon014/Kingdom-public/refs/heads/main/libreria"))() 
 -- O si es un ModuleScript local: local Library = require(path.to.KingdomPublic)
 
 -- 1. Crear la Ventana Principal
