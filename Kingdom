@@ -4,7 +4,7 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Chris
 
 -- 1. Crear la Ventana Principal
 local Window = Library:CreateWindow({
-    Title = "Kingdom Public - Hub"
+    Title = "Kingdom Public"
 })
 
 -- 2. Crear las Pestañas que quieras desde tu código principal
@@ -14,7 +14,7 @@ local MiscTab = Window:CreateTab("Misc")
 
 -- 3. Añadir Contenido a la Pestaña "Auto Farm"
 FarmTab:AddToggle({
-    Name = "Auto Strength / Punch",
+    Name = "Auto Strength",
     Default = false
 }, function(state)
     print("Auto Strength estado:", state)
