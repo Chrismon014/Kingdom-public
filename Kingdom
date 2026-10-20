@@ -4,11 +4,11 @@
 ]]
 
 -- 1. Cargar la Librería Modular (Asegúrate de colocar tu enlace Raw o requerirla localmente)
-local Library = loadstring(game:HttpGet("TU_LINK_DE_RAW_GITHUB_AQUI"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Chrismon014/Kingdom-public/refs/heads/main/libreria"))()
 
 -- 2. Crear la Ventana Principal
 local Window = Library:CreateWindow({
-    Title = "Kingdom Public - Hub"
+    Title = "Kingdom Public"
 })
 
 -- 3. Crear las Pestañas
