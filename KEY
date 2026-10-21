@@ -1140,7 +1140,6 @@ local function InitMainScript()
 
     -- SETTINGS
     SettingsTab:AddSection("Protección y Anti-Cheat")
-    SettingsTab:CreateToggle({ Name = "Anti-Cheat / Kick Protection", Default = AntiCheatActive }, function(state) AntiCheatActive = state SaveConfig() end)
     SettingsTab:CreateToggle({ Name = "Auto Execute", Default = AutoExecuteActive }, function(state) AutoExecuteActive = state SaveConfig() end)
     SettingsTab:CreateToggle({ Name = "Auto Rejoin", Default = AutoRejoinActive }, function(state) AutoRejoinActive = state SaveConfig() end)
 end
