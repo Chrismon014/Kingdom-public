@@ -71,10 +71,6 @@ local RebirthsCombination = false
 local RebirthChaos = false
 local RebirthsTitans = false
 
-local AutoTPMuscleFarming = false
-local AutoTPMuscleRebirth = false
-local MuscleKingCF = CFrame.new(-8714, 17.5, -5723)
-
 local AutoRejoinActive = true
 local AutoExecuteActive = true
 local RedactNameActive = false
@@ -188,10 +184,8 @@ end)
 local PETS = {
     ["Omega Overlord"] = { repSpeed = 20, strength = 0, durability = 0, rebirth = 0 },
     ["Swift Samurai"] = { repSpeed = 15, strength = 0, durability = 0, rebirth = 0 },
-    ["Powercore Hound"] = { repSpeed = 0, strength = 25, durability = 15, rebirth = 0 },
     ["Titanium Hydra"] = { repSpeed = 0, strength = 0, durability = 0, rebirth = 2 },
     ["Tribal Overlord"] = { repSpeed = 0, strength = 0, durability = 0, rebirth = 2 },
-    ["Inferno Unicorn"] = { repSpeed = 0, strength = 25, durability = 25, rebirth = 0 },
     ["Common Boss Pet"] = { repSpeed = 5, strength = 0, durability = 0, rebirth = 0 },
     ["Rare Boss Pet"] = { repSpeed = 7, strength = 0, durability = 0, rebirth = 0 },
     ["Epic Boss Pet"] = { repSpeed = 10, strength = 0, durability = 0, rebirth = 0 },
