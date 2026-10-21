@@ -275,7 +275,7 @@ local function InitMainScript()
     local Strength = LP.leaderstats:WaitForChild("Strength")
     local Rebirths = LP.leaderstats:WaitForChild("Rebirths")
 
-    local FastFarm800 = false
+    local FastFarm500 = false -- Actualizado de 800 a 500
     local FastFarm1k5k = false
 
     local AutoRebirth = false
@@ -593,7 +593,7 @@ local function InitMainScript()
         end)
     end
 
-    createFarmLoop(function() return FastFarm800 end, 800, 60)
+    createFarmLoop(function() return FastFarm500 end, 500, 50) -- Actualizado a 500 Rep/s con burst de 50
     createFarmLoop(function() return FastFarm1k5k end, 1200, 100)
 
     -- UI FRAMEWORK
@@ -799,8 +799,8 @@ local function InitMainScript()
 
     -- FARMING
     FarmingTab:AddSection("Modos de Farming")
-    FarmingTab:CreateToggle({ Name = "Farm 800 Rep/s", Default = false }, function(state) FastFarm800 = state if state then FastFarm1k5k = false end end)
-    FarmingTab:CreateToggle({ Name = "OP Farm 5k Rep/s", Default = false }, function(state) FastFarm1k5k = state if state then FastFarm800 = false end end)
+    FarmingTab:CreateToggle({ Name = "Farm 500 Rep/s", Default = false }, function(state) FastFarm500 = state if state then FastFarm1k5k = false end end)
+    FarmingTab:CreateToggle({ Name = "OP Farm 5k Rep/s", Default = false }, function(state) FastFarm1k5k = state if state then FastFarm500 = false end end)
 
     -- REBIRTH TAB
     RebirthTab:AddSection("Rebirth")
@@ -922,7 +922,7 @@ local function InitMainScript()
             local currentStrength = strengthStat.Value
             currentStatsBtn.Text = "Fuerza: " .. formatNumber(currentStrength) .. " | Rebirths: " .. formatNumber(currentRebirths)
 
-            local repRatePerSec = FastFarm1k5k and 1200 or (FastFarm800 and 800 or 50)
+            local repRatePerSec = FastFarm1k5k and 1200 or (FastFarm500 and 500 or 50)
             local requiredStrength = 5000 + (currentRebirths * 2550)
 
             local timePerRebirthSeconds = math.max(requiredStrength / math.max(repRatePerSec, 1), 0.1)
@@ -1023,7 +1023,6 @@ local function InitMainScript()
                             local char = LP.Character
                             if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChildOfClass("Humanoid").Health > 0 then
                                 local root = char.HumanoidRootPart
-                                -- ALTURA MÁS BAJA: Hitbox + 3 Studs directos sobre la cabeza
                                 local targetPos = hitbox.Position + Vector3.new(0, (hitbox.Size.Y / 2) + 3, 0)
                                 root.CFrame = CFrame.lookAt(targetPos, hitbox.Position)
                                 root.AssemblyLinearVelocity = Vector3.zero
@@ -1099,7 +1098,6 @@ local function InitMainScript()
                             local char = LP.Character
                             if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChildOfClass("Humanoid").Health > 0 then
                                 local root = char.HumanoidRootPart
-                                -- ALTURA MÁS BAJA: Hitbox + 3 Studs directos sobre la cabeza
                                 local targetPos = hitbox.Position + Vector3.new(0, (hitbox.Size.Y / 2) + 3, 0)
                                 root.CFrame = CFrame.lookAt(targetPos, hitbox.Position)
                                 root.AssemblyLinearVelocity = Vector3.zero
