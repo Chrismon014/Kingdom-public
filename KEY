@@ -1,4 +1,4 @@
--- ==================== SISTEMA DE KEY + INTRO CINEMÁTICA (ERDN) ====================
+-- ==================== SISTEMA UNIFICADO ERDN (AUTO REBIRTH SIMPLE + RESTO DE FUNCIONES) ====================
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -14,7 +14,6 @@ local Workspace = game:GetService("Workspace")
 
 local LP = Players.LocalPlayer
 local CORRECT_KEY = "ERDNONTOP"
-local SCRIPT_URL = "https://raw.githubusercontent.com/Chrismon014/Kingdom-public/refs/heads/main/ERDN"
 local DISCORD_LINK = "https://discord.gg/TmRWbBkpUd"
 
 local parentUI = (gethui and gethui()) or CoreGui or LP:WaitForChild("PlayerGui")
@@ -117,7 +116,7 @@ task.wait(0.2)
 TweenService:Create(SubTitle, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
 
 local emojis = {"🎃", "👻", "🦇", "🕷️", "💀", "🕯️", "🕸️", "🍬", "🧙", "🔮", "🍫", "👁️"}
-for i = 1, 45 do
+for i = 1, 35 do
     task.spawn(function()
         local emojiLabel = Instance.new("TextLabel")
         emojiLabel.Size = UDim2.new(0, 40, 0, 40)
@@ -145,10 +144,10 @@ for i = 1, 45 do
             emojiLabel.Rotation = (math.random(-50, 50)) * progress
         end)
     end)
-    task.wait(0.08)
+    task.wait(0.06)
 end
 
-task.wait(3.5)
+task.wait(2.5)
 local fadeInfo = TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 TweenService:Create(IntroBackground, fadeInfo, {BackgroundTransparency = 1}):Play()
 TweenService:Create(BrandLabel, fadeInfo, {TextTransparency = 1}):Play()
@@ -160,7 +159,7 @@ TweenService:Create(BottomBarIntro, fadeInfo, {Size = UDim2.new(1, 0, 0, 0), Pos
 task.wait(0.8)
 IntroGui:Destroy()
 
--- ==================== 2. SISTEMA DE KEY (DISEÑO CINE OSCURO) ====================
+-- ==================== 2. SISTEMA DE KEY ====================
 if parentUI:FindFirstChild("KingdomPublic_KeySystem") then
     parentUI.KingdomPublic_KeySystem:Destroy()
 end
@@ -181,17 +180,13 @@ KeyMainFrame.Size = UDim2.new(0, 380, 0, 230)
 KeyMainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 KeyMainFrame.Parent = KeyScreenGui
 
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 12)
-UICorner.Parent = KeyMainFrame
-
-local UIStroke = Instance.new("UIStroke")
+Instance.new("UICorner", KeyMainFrame).CornerRadius = UDim.new(0, 12)
+local UIStroke = Instance.new("UIStroke", KeyMainFrame)
 UIStroke.Color = Color3.fromRGB(150, 100, 240)
 UIStroke.Thickness = 1.2
 UIStroke.Transparency = 0.3
-UIStroke.Parent = KeyMainFrame
 
-local TitleLabel = Instance.new("TextLabel")
+local TitleLabel = Instance.new("TextLabel", KeyMainFrame)
 TitleLabel.Size = UDim2.new(1, 0, 0, 40)
 TitleLabel.Position = UDim2.new(0, 0, 0, 15)
 TitleLabel.BackgroundTransparency = 1
@@ -199,9 +194,8 @@ TitleLabel.Text = "🔑 ERDN - Key System"
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleLabel.Font = Enum.Font.GothamBold
 TitleLabel.TextSize = 15
-TitleLabel.Parent = KeyMainFrame
 
-local TextBox = Instance.new("TextBox")
+local TextBox = Instance.new("TextBox", KeyMainFrame)
 TextBox.Size = UDim2.new(1, -50, 0, 42)
 TextBox.Position = UDim2.new(0, 25, 0, 65)
 TextBox.BackgroundColor3 = Color3.fromRGB(16, 16, 22)
@@ -212,18 +206,9 @@ TextBox.TextColor3 = Color3.fromRGB(240, 240, 255)
 TextBox.PlaceholderColor3 = Color3.fromRGB(130, 130, 160)
 TextBox.Font = Enum.Font.GothamMedium
 TextBox.TextSize = 13
-TextBox.Parent = KeyMainFrame
+Instance.new("UICorner", TextBox).CornerRadius = UDim.new(0, 8)
 
-local BoxCorner = Instance.new("UICorner")
-BoxCorner.CornerRadius = UDim.new(0, 8)
-BoxCorner.Parent = TextBox
-
-local BoxStroke = Instance.new("UIStroke")
-BoxStroke.Color = Color3.fromRGB(60, 50, 80)
-BoxStroke.Thickness = 1
-BoxStroke.Parent = TextBox
-
-local VerifyBtn = Instance.new("TextButton")
+local VerifyBtn = Instance.new("TextButton", KeyMainFrame)
 VerifyBtn.Size = UDim2.new(0, 155, 0, 38)
 VerifyBtn.Position = UDim2.new(0, 25, 0, 125)
 VerifyBtn.BackgroundColor3 = Color3.fromRGB(150, 90, 255)
@@ -232,13 +217,9 @@ VerifyBtn.Text = "Validar Key"
 VerifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 VerifyBtn.Font = Enum.Font.GothamBold
 VerifyBtn.TextSize = 13
-VerifyBtn.Parent = KeyMainFrame
+Instance.new("UICorner", VerifyBtn).CornerRadius = UDim.new(0, 8)
 
-local VerifyCorner = Instance.new("UICorner")
-VerifyCorner.CornerRadius = UDim.new(0, 8)
-VerifyCorner.Parent = VerifyBtn
-
-local GetKeyBtn = Instance.new("TextButton")
+local GetKeyBtn = Instance.new("TextButton", KeyMainFrame)
 GetKeyBtn.Size = UDim2.new(0, 155, 0, 38)
 GetKeyBtn.Position = UDim2.new(1, -180, 0, 125)
 GetKeyBtn.BackgroundColor3 = Color3.fromRGB(22, 18, 28)
@@ -247,19 +228,9 @@ GetKeyBtn.Text = "Get Key (Discord)"
 GetKeyBtn.TextColor3 = Color3.fromRGB(210, 180, 255)
 GetKeyBtn.Font = Enum.Font.GothamBold
 GetKeyBtn.TextSize = 13
-GetKeyBtn.Parent = KeyMainFrame
+Instance.new("UICorner", GetKeyBtn).CornerRadius = UDim.new(0, 8)
 
-local GetKeyCorner = Instance.new("UICorner")
-GetKeyCorner.CornerRadius = UDim.new(0, 8)
-GetKeyCorner.Parent = GetKeyBtn
-
-local GetKeyStroke = Instance.new("UIStroke")
-GetKeyStroke.Color = Color3.fromRGB(150, 100, 240)
-GetKeyStroke.Thickness = 1
-GetKeyStroke.Transparency = 0.5
-GetKeyStroke.Parent = GetKeyBtn
-
-local StatusLabel = Instance.new("TextLabel")
+local StatusLabel = Instance.new("TextLabel", KeyMainFrame)
 StatusLabel.Size = UDim2.new(1, 0, 0, 20)
 StatusLabel.Position = UDim2.new(0, 0, 0, 180)
 StatusLabel.BackgroundTransparency = 1
@@ -267,1250 +238,920 @@ StatusLabel.Text = "Introduce la clave para continuar"
 StatusLabel.TextColor3 = Color3.fromRGB(180, 180, 200)
 StatusLabel.Font = Enum.Font.Gotham
 StatusLabel.TextSize = 11
-StatusLabel.Parent = KeyMainFrame
 
--- Botón Get Key (Discord)
 GetKeyBtn.MouseButton1Click:Connect(function()
     pcall(function()
         if setclipboard then
             setclipboard(DISCORD_LINK)
             StatusLabel.TextColor3 = Color3.fromRGB(180, 130, 255)
             StatusLabel.Text = "¡Link de Discord copiado al portapapeles! 📋"
-        elseif request then
-            request({
-                Url = "http://127.0.0.1:6463/rpc?v=1",
-                Method = "POST",
-                Headers = {
-                    ["Content-Type"] = "application/json",
-                    ["Origin"] = "https://discord.com"
-                },
-                Body = HttpService:JSONEncode({
-                    cmd = "BrowserOpen",
-                    args = { uri = DISCORD_LINK },
-                    nonce = HttpService:GenerateGUID(false)
-                })
-            })
-            StatusLabel.TextColor3 = Color3.fromRGB(180, 130, 255)
-            StatusLabel.Text = "Abriendo Discord... 🚀"
         end
     end)
 end)
 
--- Validación de Key y ejecución remota del script principal
+local function InitMainScript()
+    -- ==================== 3. SCRIPT PRINCIPAL COMPLETO Y CORREGIDO ====================
+    local services = {
+        replicatedstorage = ReplicatedStorage,
+        virtualinputmanager = game:GetService("VirtualInputManager"),
+        collectionservice = game:GetService("CollectionService"),
+        muscleEvent = ReplicatedStorage:WaitForChild("rEvents", 10),
+        isSolara = false
+    }
+
+    local lp = { player = LP }
+
+    -- Anti-AFK
+    LP.Idled:Connect(function()
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new())
+    end)
+
+    pcall(function()
+        StarterGui:SetCore("SendNotification", { Title = "ERDN Public", Text = "Anti-AFK Activo 🛡️", Duration = 4 })
+    end)
+
+    repeat task.wait(0.3) until LP:FindFirstChild("muscleEvent") and LP:FindFirstChild("leaderstats")
+
+    local Strength = LP.leaderstats:WaitForChild("Strength")
+    local Rebirths = LP.leaderstats:WaitForChild("Rebirths")
+
+    local FastFarm800 = false
+    local FastFarm1k5k = false
+
+    local AutoRebirth = false
+    local RebirthsCombination = false
+    local RebirthChaos = false
+    local RebirthsTitans = false
+
+    local AutoRejoinActive = true
+    local AutoExecuteActive = true
+    local RedactNameActive = false
+    local AntiCheatActive = true
+    local ConfigFileName = "ERDNPublic_Config.json"
+
+    local function SaveConfig()
+        if type(writefile) == "function" then
+            pcall(function()
+                local configData = {
+                    AutoExecute = AutoExecuteActive,
+                    AutoRejoin = AutoRejoinActive,
+                    RedactName = RedactNameActive,
+                    AntiCheat = AntiCheatActive
+                }
+                writefile(ConfigFileName, HttpService:JSONEncode(configData))
+            end)
+        end
+    end
+
+    local function LoadConfig()
+        if type(readfile) == "function" and type(isfile) == "function" then
+            pcall(function()
+                if isfile(ConfigFileName) then
+                    local savedData = HttpService:JSONEncode(readfile(ConfigFileName))
+                    if type(savedData) == "table" then
+                        AutoExecuteActive = savedData.AutoExecute == true
+                        AutoRejoinActive = savedData.AutoRejoin == true
+                        RedactNameActive = savedData.RedactName == true
+                        AntiCheatActive = savedData.AntiCheat == true
+                    end
+                end
+            end)
+        end
+    end
+    LoadConfig()
+
+    local nameVisibilityState = {Character = nil, Connections = {}, Guis = {}, Watches = {}}
+    local function clearNameVisibility()
+        local state = nameVisibilityState
+        for _, connection in ipairs(state.Connections) do connection:Disconnect() end
+        table.clear(state.Connections)
+        for gui, connection in pairs(state.Watches) do connection:Disconnect() state.Watches[gui] = nil end
+        for gui, wasEnabled in pairs(state.Guis) do if gui.Parent then gui.Enabled = wasEnabled end end
+        table.clear(state.Guis)
+        state.Character = nil
+    end
+
+    local function applyNameVisibility()
+        local state = nameVisibilityState
+        local character = LP.Character
+        if state.Character ~= character then
+            clearNameVisibility()
+            state.Character = character
+            if character then
+                local function watchNameGui(gui)
+                    if not gui:IsA("BillboardGui") or gui.Name ~= "nameGui" or state.Guis[gui] ~= nil then return end
+                    state.Guis[gui] = gui.Enabled
+                    state.Watches[gui] = gui:GetPropertyChangedSignal("Enabled"):Connect(function()
+                        if RedactNameActive and gui.Enabled then gui.Enabled = false end
+                    end)
+                    if RedactNameActive then gui.Enabled = false end
+                end
+                table.insert(state.Connections, character.DescendantAdded:Connect(watchNameGui))
+                table.insert(state.Connections, character.DescendantRemoving:Connect(function(gui)
+                    if state.Guis[gui] ~= nil then
+                        local connection = state.Watches[gui]
+                        if connection then connection:Disconnect() end
+                        state.Watches[gui] = nil
+                        gui.Enabled = state.Guis[gui]
+                        state.Guis[gui] = nil
+                    end
+                end))
+                for _, gui in ipairs(character:GetDescendants()) do watchNameGui(gui) end
+            end
+        end
+        for gui, wasEnabled in pairs(state.Guis) do
+            if gui.Parent then gui.Enabled = not RedactNameActive and wasEnabled end
+        end
+    end
+
+    LP.CharacterAdded:Connect(function() applyNameVisibility() end)
+
+    local oldNamecall
+    oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+        local method = getnamecallmethod()
+        if AntiCheatActive and method == "Kick" and self == LP then return end
+        return oldNamecall(self, ...)
+    end)
+
+    CoreGui.RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(child)
+        if AutoRejoinActive and (child.Name == "ErrorPrompt" or child:FindFirstChild("ErrorTitle")) then
+            pcall(function()
+                StarterGui:SetCore("SendNotification", { Title = "ERDN Public", Text = "Reconectando al servidor... 🔄", Duration = 5 })
+            end)
+            task.wait(1)
+            TeleportService:Teleport(game.PlaceId, LP)
+        end
+    end)
+
+    -- FUNCIÓN PARA DISPARAR EL RENACIMIENTO SIMPLE
+    local function triggerRebirthRemote()
+        pcall(function()
+            local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
+            local remote = rEvents and rEvents:FindFirstChild("rebirthRemote")
+            if remote then
+                if remote:IsA("RemoteFunction") then remote:InvokeServer("rebirthRequest")
+                elseif remote:IsA("RemoteEvent") then remote:FireServer("rebirthRequest") end
+            end
+        end)
+    end
+
+    -- ==================== LÓGICA DE AUTO REBIRTH SIMPLE (SIN CAMBIO DE PETS) ====================
+    task.spawn(function()
+        while true do
+            if AutoRebirth then
+                local targetStrength = 5000 + (Rebirths.Value * 2550)
+                if Strength.Value >= targetStrength then
+                    triggerRebirthRemote()
+                    task.wait(0.3)
+                end
+            end
+            task.wait(0.2)
+        end
+    end)
+
+    -- MASCOTAS Y SISTEMA DE CARGA PARA REBIRTHS AVANZADOS (Combination, Chaos, Titans)
+    local PETS = {
+        ["Omega Overlord"] = { repSpeed = 20, strength = 0, durability = 0, rebirth = 0 },
+        ["Swift Samurai"] = { repSpeed = 15, strength = 0, durability = 0, rebirth = 0 },
+        ["Powercore Hound"] = { repSpeed = 0, strength = 25, durability = 15, rebirth = 0 },
+        ["Titanium Hydra"] = { repSpeed = 0, strength = 0, durability = 0, rebirth = 2 },
+        ["Tribal Overlord"] = { repSpeed = 0, strength = 0, durability = 0, rebirth = 2 },
+        ["Inferno Unicorn"] = { repSpeed = 0, strength = 25, durability = 25, rebirth = 0 },
+        ["Common Boss Pet"] = { repSpeed = 5, strength = 0, durability = 0, rebirth = 0 },
+        ["Rare Boss Pet"] = { repSpeed = 7, strength = 0, durability = 0, rebirth = 0 },
+        ["Epic Boss Pet"] = { repSpeed = 10, strength = 0, durability = 0, rebirth = 0 },
+        ["Rainbow Boss Pet"] = { repSpeed = 10, strength = 7, durability = 0, rebirth = 0 },
+        ["Legendary Boss Pet"] = { repSpeed = 10, strength = 10, durability = 0, rebirth = 0 },
+        ["Mythic Boss Pet"] = { repSpeed = 10, strength = 20, durability = 0, rebirth = 0 },
+        ["Inferno Drake"] = { repSpeed = 40, strength = 0, durability = 0, rebirth = 0 },
+    }
+    local MAX_PET_SLOTS = 12
+
+    local function applyPetLoadout(selected)
+        local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
+        local remote = rEvents and rEvents:FindFirstChild("equipPetEvent")
+        if not remote then return false end
+
+        local petsFolder = LP:FindFirstChild("petsFolder")
+        if petsFolder then
+            for _, folder in ipairs(petsFolder:GetChildren()) do
+                if folder:IsA("Folder") then
+                    for _, pet in ipairs(folder:GetChildren()) do
+                        remote:FireServer("unequipPet", pet)
+                    end
+                end
+            end
+        end
+        task.wait(0.05)
+        for _, pet in ipairs(selected) do
+            remote:FireServer("equipPet", pet)
+        end
+        return true
+    end
+
+    local function getOwnedConfiguredPets()
+        local ownedPets = {}
+        local petsFolder = LP:FindFirstChild("petsFolder")
+        if petsFolder then
+            for _, folder in ipairs(petsFolder:GetChildren()) do
+                if folder:IsA("Folder") then
+                    for _, pet in ipairs(folder:GetChildren()) do
+                        local config = PETS[pet.Name]
+                        if config then
+                            table.insert(ownedPets, { instance = pet, name = pet.Name, repSpeed = config.repSpeed or 0, rebirth = config.rebirth or 0 })
+                        end
+                    end
+                end
+            end
+        end
+        return ownedPets
+    end
+
+    local function equipFarmingPets(mode)
+        local pets = getOwnedConfiguredPets()
+        local selected = {}
+        local count = 0
+
+        if mode == "Chaos" then
+            for _, pet in ipairs(pets) do
+                if pet.name == "Swift Samurai" and count < MAX_PET_SLOTS then
+                    table.insert(selected, pet.instance)
+                    count = count + 1
+                end
+            end
+        elseif mode == "Titans" then
+            for _, pet in ipairs(pets) do
+                if pet.name == "Omega Overlord" and count < MAX_PET_SLOTS then
+                    table.insert(selected, pet.instance)
+                    count = count + 1
+                end
+            end
+        else
+            table.sort(pets, function(a, b) return a.repSpeed > b.repSpeed end)
+            for _, pet in ipairs(pets) do
+                if count >= MAX_PET_SLOTS then break end
+                if pet.repSpeed > 0 then
+                    table.insert(selected, pet.instance)
+                    count = count + 1
+                end
+            end
+        end
+        applyPetLoadout(selected)
+    end
+
+    local function equipRebirthPets(mode)
+        local pets = getOwnedConfiguredPets()
+        local selected = {}
+        local count = 0
+
+        if mode == "Chaos" then
+            for _, pet in ipairs(pets) do
+                if pet.name == "Tribal Overlord" and count < MAX_PET_SLOTS then
+                    table.insert(selected, pet.instance)
+                    count = count + 1
+                end
+            end
+        elseif mode == "Titans" then
+            for _, pet in ipairs(pets) do
+                if pet.name == "Titanium Hydra" and count < MAX_PET_SLOTS then
+                    table.insert(selected, pet.instance)
+                    count = count + 1
+                end
+            end
+        else
+            table.sort(pets, function(a, b) return a.rebirth > b.rebirth end)
+            for _, pet in ipairs(pets) do
+                if count >= MAX_PET_SLOTS then break end
+                if pet.rebirth > 0 then
+                    table.insert(selected, pet.instance)
+                    count = count + 1
+                end
+            end
+        end
+        applyPetLoadout(selected)
+    end
+
+    -- ==================== LÓGICA DE REBIRTHS AVANZADOS (Combination, Chaos, Titans) ====================
+    task.spawn(function()
+        local lastEquipMode = nil
+        while true do
+            if RebirthsCombination or RebirthChaos or RebirthsTitans then
+                local mode = RebirthChaos and "Chaos" or (RebirthsTitans and "Titans" or "Normal")
+                local targetStrength = 5000 + (Rebirths.Value * 2550)
+
+                if Strength.Value < targetStrength then
+                    if lastEquipMode ~= mode .. "_Farm" then
+                        equipFarmingPets(mode)
+                        lastEquipMode = mode .. "_Farm"
+                    end
+
+                    local muscleEvent = LP:FindFirstChild("muscleEvent")
+                    if muscleEvent then
+                        for i = 1, 15 do
+                            muscleEvent:FireServer("rep")
+                        end
+                    end
+                else
+                    if lastEquipMode ~= mode .. "_Rebirth" then
+                        equipRebirthPets(mode)
+                        lastEquipMode = mode .. "_Rebirth"
+                        task.wait(0.2)
+                    end
+
+                    triggerRebirthRemote()
+                    task.wait(0.3)
+                end
+                task.wait(0.01)
+            else
+                lastEquipMode = nil
+                task.wait(0.3)
+            end
+        end
+    end)
+
+    -- FARMING DE REPETICIONES ULTRA-RÁPIDAS
+    local function createFarmLoop(getState, rate, burst)
+        task.spawn(function()
+            local cachedEvent = LP:FindFirstChild("muscleEvent")
+            LP.ChildAdded:Connect(function(child)
+                if child.Name == "muscleEvent" then cachedEvent = child end
+            end)
+            local INTERVAL = burst / rate
+            while true do
+                if getState() then
+                    if not cachedEvent or not cachedEvent.Parent then cachedEvent = LP:FindFirstChild("muscleEvent") end
+                    if cachedEvent then
+                        local start = os.clock()
+                        for i = 1, burst do
+                            if not getState() then break end
+                            pcall(function() cachedEvent:FireServer("rep") end)
+                        end
+                        local remaining = INTERVAL - (os.clock() - start)
+                        if remaining > 0 then task.wait(remaining) else task.wait(0.02) end
+                    else task.wait(0.05) end
+                else task.wait(0.15) end
+            end
+        end)
+    end
+
+    createFarmLoop(function() return FastFarm800 end, 800, 60)
+    createFarmLoop(function() return FastFarm1k5k end, 1200, 100)
+
+    -- UI FRAMEWORK
+    local Library = {}
+    local function Create(className, properties, parent)
+        local instance = Instance.new(className)
+        for property, value in pairs(properties) do instance[property] = value end
+        if parent then instance.Parent = parent end
+        return instance
+    end
+
+    local function MakeDraggable(dragBar, object)
+        local dragging, dragStart, startPos
+        dragBar.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                dragStart = input.Position
+                startPos = object.Position
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then dragging = false end
+                end)
+            end
+        end)
+        UserInputService.InputChanged:Connect(function(input)
+            if not dragging then return end
+            if input.UserInputType ~= Enum.UserInputType.MouseMovement and input.UserInputType ~= Enum.UserInputType.Touch then return end
+            local delta = input.Position - dragStart
+            object.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end)
+    end
+
+    function Library:CreateWindow(config)
+        local WindowObj = {}
+        local windowTitle = config.Title or "👑 ERDN Public"
+        
+        if parentUI:FindFirstChild("ERDN_PublicUI") then parentUI.ERDN_PublicUI:Destroy() end
+
+        local ScreenGui = Create("ScreenGui", { Name = "ERDN_PublicUI", ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true }, parentUI)
+        local MainFrame = Create("Frame", { Name = "MainFrame", BackgroundColor3 = Color3.fromRGB(18, 18, 22), BackgroundTransparency = 0.25, Size = UDim2.new(0, 580, 0, 360), Position = UDim2.new(0.5, 0, 0.5, 0), AnchorPoint = Vector2.new(0.5, 0.5) }, ScreenGui)
+
+        Create("UICorner", {CornerRadius = UDim.new(0, 12)}, MainFrame)
+        Create("UIStroke", {Color = Color3.fromRGB(120, 80, 255), Thickness = 1.5, Transparency = 0.2}, MainFrame)
+
+        local MiniButton = Create("TextButton", { Name = "ERDN_Mini", Size = UDim2.new(0, 140, 0, 38), Position = UDim2.new(1, -155, 0, 15), BackgroundColor3 = Color3.fromRGB(22, 22, 30), BackgroundTransparency = 0.25, Text = windowTitle, TextColor3 = Color3.fromRGB(235, 235, 255), Font = Enum.Font.GothamBold, TextSize = 12, Visible = false, AutoButtonColor = false }, ScreenGui)
+        Create("UICorner", {CornerRadius = UDim.new(0, 10)}, MiniButton)
+        Create("UIStroke", {Color = Color3.fromRGB(120, 80, 255), Thickness = 1.5}, MiniButton)
+
+        local TopBar = Create("Frame", { Name = "TopBar", BackgroundColor3 = Color3.fromRGB(12, 12, 16), BackgroundTransparency = 0.35, Size = UDim2.new(1, 0, 0, 32) }, MainFrame)
+        Create("UICorner", {CornerRadius = UDim.new(0, 12)}, TopBar)
+        MakeDraggable(TopBar, MainFrame)
+
+        local CloseBtn = Create("TextButton", { Size = UDim2.new(0, 24, 0, 24), Position = UDim2.new(1, -30, 0, 4), BackgroundColor3 = Color3.fromRGB(30, 30, 38), Text = "×", TextColor3 = Color3.fromRGB(180, 180, 200), Font = Enum.Font.GothamBold, TextSize = 16 }, TopBar)
+        Create("UICorner", {CornerRadius = UDim.new(0, 6)}, CloseBtn)
+        CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+
+        local MinimizeBtn = Create("TextButton", { Size = UDim2.new(0, 24, 0, 24), Position = UDim2.new(1, -60, 0, 4), BackgroundColor3 = Color3.fromRGB(30, 30, 38), Text = "-", TextColor3 = Color3.fromRGB(210, 210, 225), Font = Enum.Font.GothamBold, TextSize = 16 }, TopBar)
+        Create("UICorner", {CornerRadius = UDim.new(0, 6)}, MinimizeBtn)
+
+        MinimizeBtn.MouseButton1Click:Connect(function() MainFrame.Visible = false MiniButton.Visible = true end)
+        MiniButton.MouseButton1Click:Connect(function() MiniButton.Visible = false MainFrame.Visible = true end)
+
+        local Container = Create("Frame", { Name = "Container", BackgroundTransparency = 1, Position = UDim2.new(0, 0, 0, 32), Size = UDim2.new(1, 0, 1, -32) }, MainFrame)
+        local Sidebar = Create("Frame", { Name = "Sidebar", BackgroundColor3 = Color3.fromRGB(12, 12, 16), BackgroundTransparency = 0.35, Size = UDim2.new(0, 140, 1, 0) }, Container)
+        Create("UICorner", {CornerRadius = UDim.new(0, 12)}, Sidebar)
+
+        local AvatarImage = Create("ImageLabel", { Name = "AvatarImage", BackgroundColor3 = Color3.fromRGB(25, 24, 32), Size = UDim2.new(0, 36, 0, 36), Position = UDim2.new(0, 12, 0, 12), Image = Players:GetUserThumbnailAsync(LP.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150) }, Sidebar)
+        Create("UICorner", {CornerRadius = UDim.new(1, 0)}, AvatarImage)
+
+        local NavContainer = Create("ScrollingFrame", { Name = "NavContainer", Size = UDim2.new(1, -6, 1, -64), Position = UDim2.new(0, 3, 0, 62), BackgroundTransparency = 1, ScrollBarThickness = 3 }, Sidebar)
+        local navLayout = Create("UIListLayout", { Padding = UDim.new(0, 5), SortOrder = Enum.SortOrder.LayoutOrder }, NavContainer)
+
+        local ContentContainer = Create("Frame", { Name = "ContentContainer", Size = UDim2.new(1, -145, 1, 0), Position = UDim2.new(0, 145, 0, 0), BackgroundTransparency = 1 }, Container)
+
+        local pages = {}
+        local navButtons = {}
+        local firstTab = true
+
+        local emojiMap = { ["Principal"] = "🏠", ["Farming"] = "🏋️", ["Rebirth"] = "🌌", ["Auto Rocks"] = "⛰️", ["Auto Gym"] = "🏋️‍♂️", ["Stats"] = "📊", ["Gift"] = "🎁", ["Boss"] = "👹", ["Teleport"] = "🌀", ["Settings"] = "⚙️" }
+
+        function WindowObj:CreateTab(name, iconChar, subTitleText)
+            local finalIcon = iconChar or emojiMap[name] or name:sub(1, 1)
+
+            local btn = Create("TextButton", { Name = name .. "TabBtn", Size = UDim2.new(1, -6, 0, 32), BackgroundColor3 = Color3.fromRGB(12, 12, 16), BackgroundTransparency = 0.5, Text = "", AutoButtonColor = false }, NavContainer)
+            Create("UICorner", {CornerRadius = UDim.new(0, 8)}, btn)
+
+            local iconLabel = Create("TextLabel", { Size = UDim2.new(0, 20, 1, 0), Position = UDim2.new(0, 8, 0, 0), BackgroundTransparency = 1, Text = finalIcon, TextColor3 = Color3.fromRGB(160, 160, 180), Font = Enum.Font.GothamBold, TextSize = 11 }, btn)
+            local textLabel = Create("TextLabel", { Size = UDim2.new(1, -32, 1, 0), Position = UDim2.new(0, 28, 0, 0), BackgroundTransparency = 1, Text = name, TextColor3 = Color3.fromRGB(180, 180, 200), Font = Enum.Font.GothamMedium, TextSize = 11, TextXAlignment = Enum.TextXAlignment.Left }, btn)
+            local indicator = Create("Frame", { Size = UDim2.new(0, 3, 0, 18), Position = UDim2.new(0, 0, 0.5, -9), BackgroundColor3 = Color3.fromRGB(120, 80, 255), Visible = false }, btn)
+            Create("UICorner", {CornerRadius = UDim.new(0, 2)}, indicator)
+
+            local page = Create("ScrollingFrame", { Name = name .. "Page", Size = UDim2.new(1, -16, 1, -12), Position = UDim2.new(0, 8, 0, 6), BackgroundTransparency = 1, ScrollBarThickness = 3, Visible = false }, ContentContainer)
+            local pageLayout = Create("UIListLayout", { Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder }, page)
+
+            pageLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() page.CanvasSize = UDim2.new(0, 0, 0, pageLayout.AbsoluteContentSize.Y + 15) end)
+
+            Create("TextLabel", { Size = UDim2.new(1, 0, 0, 22), BackgroundTransparency = 1, Text = finalIcon .. "  " .. name, TextColor3 = Color3.fromRGB(255, 255, 255), Font = Enum.Font.GothamBold, TextSize = 18, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = -2 }, page)
+            if subTitleText then Create("TextLabel", { Size = UDim2.new(1, 0, 0, 16), BackgroundTransparency = 1, Text = subTitleText, TextColor3 = Color3.fromRGB(140, 140, 160), Font = Enum.Font.Gotham, TextSize = 11, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = -1 }, page) end
+
+            table.insert(navButtons, { Button = btn, Indicator = indicator, Icon = iconLabel, Text = textLabel })
+
+            if firstTab then
+                firstTab = false page.Visible = true btn.BackgroundColor3 = Color3.fromRGB(28, 24, 45) btn.BackgroundTransparency = 0.25 indicator.Visible = true iconLabel.TextColor3 = Color3.fromRGB(255, 255, 255) textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            end
+
+            btn.MouseButton1Click:Connect(function()
+                for _, p in pairs(pages) do p.Visible = false end
+                page.Visible = true
+                for _, navItem in ipairs(navButtons) do
+                    navItem.Button.BackgroundColor3 = Color3.fromRGB(12, 12, 16) navItem.Button.BackgroundTransparency = 0.5 navItem.Indicator.Visible = false navItem.Icon.TextColor3 = Color3.fromRGB(160, 160, 180) navItem.Text.TextColor3 = Color3.fromRGB(180, 180, 200)
+                end
+                btn.BackgroundColor3 = Color3.fromRGB(28, 24, 45) btn.BackgroundTransparency = 0.25 indicator.Visible = true iconLabel.TextColor3 = Color3.fromRGB(255, 255, 255) textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            end)
+
+            pages[name] = page
+            local TabMethods = {}
+
+            function TabMethods:AddSection(secText) return Create("TextLabel", { Size = UDim2.new(1, 0, 0, 24), BackgroundTransparency = 1, Text = string.upper(secText), TextColor3 = Color3.fromRGB(150, 120, 230), Font = Enum.Font.GothamBold, TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left }, page) end
+            function TabMethods:AddHeading(text) return self:AddSection(text) end
+            function TabMethods:AddLabel(text) return Create("TextLabel", { Size = UDim2.new(1, 0, 0, 20), BackgroundTransparency = 1, Text = text, TextColor3 = Color3.fromRGB(210, 210, 225), Font = Enum.Font.GothamMedium, TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd }, page) end
+
+            function TabMethods:CreateToggle(config, callback)
+                local currentState = config.Default or false
+                local row = Create("Frame", { Size = UDim2.new(1, -6, 0, (config.Description and config.Description ~= "") and 52 or 40), BackgroundColor3 = Color3.fromRGB(24, 24, 30), BackgroundTransparency = 0.35 }, page)
+                Create("UICorner", {CornerRadius = UDim.new(0, 8)}, row)
+                Create("TextLabel", { Size = UDim2.new(1, -75, 0, 20), Position = UDim2.new(0, 12, 0, (config.Description and config.Description ~= "") and 8 or 10), BackgroundTransparency = 1, Text = config.Name, TextColor3 = Color3.fromRGB(240, 240, 250), Font = Enum.Font.GothamBold, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left }, row)
+
+                if config.Description and config.Description ~= "" then
+                    Create("TextLabel", { Size = UDim2.new(1, -75, 0, 16), Position = UDim2.new(0, 12, 0, 28), BackgroundTransparency = 1, Text = config.Description, TextColor3 = Color3.fromRGB(130, 130, 150), Font = Enum.Font.Gotham, TextSize = 10, TextXAlignment = Enum.TextXAlignment.Left }, row)
+                end
+
+                local switchBg = Create("Frame", { Size = UDim2.new(0, 42, 0, 24), Position = UDim2.new(1, -52, 0.5, -12), BackgroundColor3 = currentState and Color3.fromRGB(100, 70, 220) or Color3.fromRGB(50, 50, 60) }, row)
+                Create("UICorner", {CornerRadius = UDim.new(1, 0)}, switchBg)
+
+                local knob = Create("Frame", { Size = UDim2.new(0, 18, 0, 18), Position = currentState and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9), BackgroundColor3 = Color3.fromRGB(255, 255, 255) }, switchBg)
+                Create("UICorner", {CornerRadius = UDim.new(1, 0)}, knob)
+
+                local clickBtn = Create("TextButton", { Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Text = "" }, row)
+                clickBtn.MouseButton1Click:Connect(function()
+                    currentState = not currentState
+                    local tweenInfo = TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                    TweenService:Create(switchBg, tweenInfo, {BackgroundColor3 = currentState and Color3.fromRGB(100, 70, 220) or Color3.fromRGB(50, 50, 60)}):Play()
+                    TweenService:Create(knob, tweenInfo, {Position = currentState and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)}):Play()
+                    pcall(callback, currentState)
+                end)
+                if config.Default then pcall(callback, true) end
+                return { Set = function(self, val) currentState = val switchBg.BackgroundColor3 = val and Color3.fromRGB(100, 70, 220) or Color3.fromRGB(50, 50, 60) knob.Position = val and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9) pcall(callback, val) end }
+            end
+
+            function TabMethods:AddSwitch(text, callback) return self:CreateToggle({ Name = text, Description = "", Default = false }, callback) end
+            function TabMethods:AddButton(text, callback)
+                local btn = Create("TextButton", { Size = UDim2.new(1, -6, 0, 36), BackgroundColor3 = Color3.fromRGB(28, 24, 45), BackgroundTransparency = 0.35, Text = text, TextColor3 = Color3.fromRGB(235, 235, 255), Font = Enum.Font.GothamBold, TextSize = 12 }, page)
+                Create("UICorner", {CornerRadius = UDim.new(0, 8)}, btn)
+                btn.MouseButton1Click:Connect(function() pcall(callback) end)
+                return btn
+            end
+
+            function TabMethods:AddTextBox(placeholder, callback)
+                local row = Create("Frame", { Size = UDim2.new(1, -6, 0, 38), BackgroundColor3 = Color3.fromRGB(24, 24, 30), BackgroundTransparency = 0.35 }, page)
+                Create("UICorner", {CornerRadius = UDim.new(0, 8)}, row)
+                local box = Create("TextBox", { Size = UDim2.new(1, -20, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, PlaceholderText = placeholder or "Escribe aquí...", Text = "", TextColor3 = Color3.fromRGB(240, 240, 250), PlaceholderColor3 = Color3.fromRGB(120, 120, 140), Font = Enum.Font.GothamMedium, TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left }, row)
+                box.FocusLost:Connect(function() pcall(callback, box.Text) end)
+                return box
+            end
+
+            return TabMethods
+        end
+        return WindowObj
+    end
+
+    local Window = Library:CreateWindow({ Title = "👑 ERDN Public", Icon = "rbxassetid://6031097225" })
+
+    local PrincipalTab = Window:CreateTab("Principal", "🏠", "Bienvenido al script")
+    local FarmingTab = Window:CreateTab("Farming", "🏋️", "Fast Fuerza")
+    local RebirthTab = Window:CreateTab("Rebirth", "🌌", "Fast Renacimientos")
+    local RocksTab = Window:CreateTab("Auto Rocks", "⛰️", "Farm Rocks")
+    local AutoGymTab = Window:CreateTab("Auto Gym", "🏋️‍♂️", "Gimnasio Automático")
+    local StatsTab = Window:CreateTab("Stats", "📊", "Estadisticas")
+    local GiftTab = Window:CreateTab("Gift", "🎁", "Regala eggs")
+    local BossTab = Window:CreateTab("Boss", "👹", "Sistema de Bosses")
+    local TeleportTab = Window:CreateTab("Teleport", "🌀", "TPs")
+    local SettingsTab = Window:CreateTab("Settings", "⚙️", "Configuración")
+
+    local function formatNumber(number)
+        local isNegative = number < 0
+        number = math.abs(number)
+        if number >= 1e18 then return (isNegative and "-" or "") .. string.format("%.2fQi", number / 1e18)
+        elseif number >= 1e15 then return (isNegative and "-" or "") .. string.format("%.2fQa", number / 1e15)
+        elseif number >= 1e12 then return (isNegative and "-" or "") .. string.format("%.2fT", number / 1e12)
+        elseif number >= 1e9 then return (isNegative and "-" or "") .. string.format("%.2fB", number / 1e9)
+        elseif number >= 1e6 then return (isNegative and "-" or "") .. string.format("%.2fM", number / 1e6)
+        elseif number >= 1e3 then return (isNegative and "-" or "") .. string.format("%.2fK", number / 1e3)
+        else return (isNegative and "-" or "") .. string.format("%.0f", number) end
+    end
+
+    local function formatCurrentStat(val) return tostring(val or 0) end
+
+    -- PRINCIPAL
+    PrincipalTab:AddSection("Utilidades")
+    PrincipalTab:CreateToggle({ Name = "Hide Name", Description = "Oculta el nombre sobre tu personaje", Default = RedactNameActive }, function(state)
+        RedactNameActive = state applyNameVisibility() SaveConfig()
+    end)
+    PrincipalTab:CreateToggle({ Name = "Anti-AFK", Description = "Protección contra inactividad", Default = true }, function(state) end)
+
+    -- FARMING
+    FarmingTab:AddSection("Modos de Farming")
+    FarmingTab:CreateToggle({ Name = "Farm 800 Rep/s", Default = false }, function(state) FastFarm800 = state if state then FastFarm1k5k = false end end)
+    FarmingTab:CreateToggle({ Name = "OP Farm 5k Rep/s", Default = false }, function(state) FastFarm1k5k = state if state then FastFarm800 = false end end)
+
+    -- REBIRTH TAB
+    RebirthTab:AddSection("Rebirth")
+    RebirthTab:CreateToggle({ Name = "Auto Rebirth", Description = "Rebirths + Strength (Sin cambio de pets)", Default = false }, function(state)
+        AutoRebirth = state
+        if state then RebirthsCombination = false RebirthChaos = false RebirthsTitans = false end
+    end)
+
+    RebirthTab:AddSection("Fast Rebirth (Packs & Pets)")
+    RebirthTab:CreateToggle({ Name = "Auto Rebirths combination", Description = "Sirven Golems/Packs/Dragon", Default = false }, function(state)
+        RebirthsCombination = state
+        if state then AutoRebirth = false RebirthChaos = false RebirthsTitans = false end
+    end)
+
+    RebirthTab:CreateToggle({ Name = "Rebirth chaos", Description = "Samurai (Rep) / Tribal (Rebirth)", Default = false }, function(state)
+        RebirthChaos = state
+        if state then AutoRebirth = false RebirthsCombination = false RebirthsTitans = false end
+    end)
+
+    RebirthTab:CreateToggle({ Name = "Rebirths titans", Description = "Omega (Rep) / Titanium (Rebirth)", Default = false }, function(state)
+        RebirthsTitans = state
+        if state then AutoRebirth = false RebirthsCombination = false RebirthChaos = false end
+    end)
+
+    -- AUTO ROCKS
+    RocksTab:AddSection("Farming de Rocas")
+    local activeRock = nil
+    local function getrocktool()
+        local backpack = LP:FindFirstChild("Backpack")
+        local char = LP.Character
+        if backpack and char and char:FindFirstChild("Humanoid") then
+            local punch = backpack:FindFirstChild("Punch") or char:FindFirstChild("Punch")
+            if punch and punch.Parent == backpack then char.Humanoid:EquipTool(punch) end
+        end
+        pcall(function()
+            if LP:FindFirstChild("muscleEvent") then
+                LP.muscleEvent:FireServer("punch", "leftHand")
+                LP.muscleEvent:FireServer("punch", "rightHand")
+            end
+        end)
+    end
+
+    local rockList = {
+        { Name = "Farm Tiny Island Rock", MinDur = 0, DurVal = 0 },
+        { Name = "Farm Starter Island Rock", MinDur = 100, DurVal = 100 },
+        { Name = "Farm Legend Beach Rock", MinDur = 5000, DurVal = 5000 },
+        { Name = "Farm Frost Gym Rock", MinDur = 150000, DurVal = 150000 },
+        { Name = "Farm Mythical Gym Rock", MinDur = 400000, DurVal = 400000 },
+        { Name = "Farm Eternal Gym Rock", MinDur = 750000, DurVal = 750000 },
+        { Name = "Farm Legend Gym Rock", MinDur = 1000000, DurVal = 1000000 },
+        { Name = "Farm Muscle King Gym Rock", MinDur = 5000000, DurVal = 5000000 },
+        { Name = "Farm Ancient Jungle Rock", MinDur = 10000000, DurVal = 10000000 },
+        { Name = "Farm Industrial Jungle Rock", MinDur = 25000000, DurVal = 25000000 },
+        { Name = "Farm Hallowed Rock", MinDur = 0, DurVal = 0 },
+    }
+
+    for _, rockInfo in ipairs(rockList) do
+        RocksTab:CreateToggle({ Name = rockInfo.Name, Description = "Requiere " .. rockInfo.MinDur .. " Durabilidad", Default = false }, function(bool)
+            if bool then
+                activeRock = rockInfo.Name
+                task.spawn(function()
+                    while activeRock == rockInfo.Name do
+                        task.wait(0.01)
+                        pcall(function()
+                            local durabilityObj = LP:FindFirstChild("Durability")
+                            if durabilityObj and durabilityObj.Value >= rockInfo.MinDur then
+                                getrocktool()
+                                local machinesFolder = workspace:FindFirstChild("machinesFolder")
+                                if machinesFolder then
+                                    for _, v in pairs(machinesFolder:GetDescendants()) do
+                                        if v.Name == "neededDurability" and v.Value == rockInfo.DurVal then
+                                            local rockPart = v.Parent and v.Parent:FindFirstChild("Rock")
+                                            local char = LP.Character
+                                            if rockPart and char then
+                                                local rightHand = char:FindFirstChild("RightHand")
+                                                local leftHand = char:FindFirstChild("LeftHand")
+                                                if rightHand and leftHand then
+                                                    firetouchinterest(rockPart, rightHand, 0) firetouchinterest(rockPart, rightHand, 1)
+                                                    firetouchinterest(rockPart, leftHand, 0) firetouchinterest(rockPart, leftHand, 1)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end)
+            else
+                if activeRock == rockInfo.Name then activeRock = nil end
+            end
+        end)
+    end
+
+    AutoGymTab:AddSection("Próximamente")
+    AutoGymTab:AddLabel("Esta sección estará disponible pronto...")
+
+    -- STATS
+    StatsTab:AddSection("Estadísticas en Tiempo Real")
+    local stopwatchLabel = StatsTab:AddButton("Fast Rep Time: 0d 0h 0m 0s", function() end)
+    local strengthLabel = StatsTab:AddButton("Strength: 0 | Gained: 0", function() end)
+    local durabilityLabel = StatsTab:AddButton("Durability: 0 | Gained: 0", function() end)
+    local rebirthsCountLabel = StatsTab:AddButton("Rebirths: 0 | Gained: 0", function() end)
+
+    local leaderstats = LP:WaitForChild("leaderstats")
+    local strengthStat = leaderstats:WaitForChild("Strength")
+    local durabilityStat = LP:WaitForChild("Durability")
+    local rebirthsStat = leaderstats:WaitForChild("Rebirths")
+
+    local startTime = tick()
+    local initialStrength = strengthStat.Value
+    local initialDurability = durabilityStat.Value
+    local initialRebirths = rebirthsStat.Value
+
+    task.spawn(function()
+        while true do
+            local currentTime = tick()
+            local elapsedTime = currentTime - startTime
+            local days = math.floor(elapsedTime / (24 * 3600))
+            local hours = math.floor((elapsedTime % (24 * 3600)) / 3600)
+            local minutes = math.floor((elapsedTime % 3600) / 60)
+            local seconds = math.floor(elapsedTime % 60)
+            stopwatchLabel.Text = string.format("Fast Rep Time: %dd %dh %dm %ds", days, hours, minutes, seconds)
+            strengthLabel.Text = "Strength: " .. formatNumber(strengthStat.Value) .. " | Gained: " .. formatNumber(strengthStat.Value - initialStrength)
+            durabilityLabel.Text = "Durability: " .. formatNumber(durabilityStat.Value) .. " | Gained: " .. formatNumber(durabilityStat.Value - initialDurability)
+            rebirthsCountLabel.Text = "Rebirths: " .. tostring(rebirthsStat.Value) .. " | Gained: " .. tostring(rebirthsStat.Value - initialRebirths)
+            task.wait(0.5)
+        end
+    end)
+
+    -- GIFT EGGS & WHEEL
+    GiftTab:AddSection("Gift Eggs")
+    local proteinEggBtn = GiftTab:AddButton("Protein Eggs: 0", function() end)
+    GiftTab:AddSection("Regalar Protein Eggs")
+    local targetEggPlayerName = ""
+    local giftEggAmount = 0
+    GiftTab:AddTextBox("Nombre del jugador", function(text) targetEggPlayerName = text end)
+    GiftTab:AddTextBox("Cantidad de Eggs", function(text) giftEggAmount = tonumber(text) or 0 end)
+
+    GiftTab:AddSection("Ruleta Automática")
+    GiftTab:CreateToggle({ Name = "Auto Spin Fortune Wheel", Description = "Gira la ruleta automáticamente", Default = false }, function(state)
+        _G.AutoSpinWheel = state
+        if state then
+            task.spawn(function()
+                while _G.AutoSpinWheel do
+                    pcall(function()
+                        local spinRemote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("openFortuneWheelRemote")
+                        if spinRemote then spinRemote:InvokeServer("openFortuneWheel") end
+                    end)
+                    task.wait(0.6)
+                end
+            end)
+        end
+    end)
+
+    -- ==================== SISTEMA COMPLETO DE BOSS & HALLOWEEN BOSS ====================
+    BossTab:AddHeading("Boss Farming (Normal)")
+    BossTab.StatusLabel = BossTab:AddLabel("Status: Waiting for Boss")
+    BossTab.BossLabel = BossTab:AddLabel("Boss: None")
+    BossTab.HealthLabel = BossTab:AddLabel("Health: 0 / 0")
+    BossTab.NextBossLabel = BossTab:AddLabel("Next Boss: N/A")
+
+    BossTab.Data = { Running = false, Generation = 0, LastPunch = 0, PunchInterval = 0.01, Bosses = {}, SelectedBosses = {} }
+
+    BossTab.addBossChoice = function(modelName, displayName)
+        if BossTab.Data.Bosses[modelName] then return end
+        BossTab.Data.Bosses[modelName] = displayName
+        BossTab.Data.SelectedBosses[modelName] = true
+        BossTab:CreateToggle({ Name = "Farm " .. displayName, Default = true }, function(state) BossTab.Data.SelectedBosses[modelName] = state end)
+    end
+
+    BossTab.addBossChoice("CommonBoss", "Common Boss")
+    BossTab.addBossChoice("RareBoss", "Rare Boss")
+    BossTab.addBossChoice("EpicBoss", "Epic Boss")
+    BossTab.addBossChoice("LegendaryBoss", "Legendary Boss")
+    BossTab.addBossChoice("MythicBoss", "Mythic Boss")
+    BossTab.addBossChoice("RainbowBoss", "Rainbow Boss")
+
+    BossTab.findActiveBoss = function()
+        for _, candidate in ipairs(services.collectionservice:GetTagged("BossEventBoss")) do
+            if candidate:IsA("Model") and candidate:IsDescendantOf(Workspace) then
+                local hitbox = candidate:FindFirstChild("BossDamageHitbox", true)
+                local stats = candidate:FindFirstChild("stats")
+                local health = stats and stats:FindFirstChild("Health")
+                if hitbox and health and health.Value > 0 then
+                    return candidate, hitbox, health.Value, stats:FindFirstChild("MaxHealth") and stats.MaxHealth.Value or health.Value
+                end
+            end
+        end
+    end
+
+    BossTab.AutoFarmSwitch = BossTab:AddSwitch("Auto Farm Boss", function(state)
+        BossTab.Data.Running = state
+        BossTab.Data.Generation = BossTab.Data.Generation + 1
+        local gen = BossTab.Data.Generation
+        if state then
+            task.spawn(function()
+                while BossTab.Data.Running and BossTab.Data.Generation == gen do
+                    pcall(function()
+                        local model, hitbox, currentHp, maxHp = BossTab.findActiveBoss()
+                        if model and hitbox and BossTab.Data.SelectedBosses[model.Name] ~= false then
+                            BossTab.StatusLabel.Text = "Status: Fighting"
+                            BossTab.BossLabel.Text = "Boss: " .. model.Name
+                            BossTab.HealthLabel.Text = "Health: " .. formatCurrentStat(currentHp) .. " / " .. formatCurrentStat(maxHp)
+
+                            local char = LP.Character
+                            if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChildOfClass("Humanoid").Health > 0 then
+                                local root = char.HumanoidRootPart
+                                local headPos = hitbox.Position + Vector3.new(0, hitbox.Size.Y * 0.35, 0)
+                                root.CFrame = CFrame.lookAt(headPos + Vector3.new(0, 65, 0), headPos)
+                                root.AssemblyLinearVelocity = Vector3.zero
+
+                                local backpack = LP:FindFirstChild("Backpack")
+                                local punch = char:FindFirstChild("Punch") or (backpack and backpack:FindFirstChild("Punch"))
+                                if punch and punch.Parent == backpack then char.Humanoid:EquipTool(punch) end
+
+                                if os.clock() - BossTab.Data.LastPunch >= BossTab.Data.PunchInterval then
+                                    BossTab.Data.LastPunch = os.clock()
+                                    if LP:FindFirstChild("muscleEvent") then
+                                        LP.muscleEvent:FireServer("punch", "leftHand")
+                                        LP.muscleEvent:FireServer("punch", "rightHand")
+                                    end
+                                    if punch and punch.Parent == char then punch:Activate() end
+                                end
+                            end
+                        else
+                            BossTab.StatusLabel.Text = "Status: Waiting for Boss"
+                            BossTab.BossLabel.Text = "Boss: None"
+                            BossTab.HealthLabel.Text = "Health: 0 / 0"
+                        end
+                    end)
+                    task.wait(0.02)
+                end
+            end)
+        end
+    end)
+
+    -- HALLOWEEN BOSS FARMING
+    BossTab:AddHeading("Halloween Boss Farming")
+    BossTab.Halloween = {
+        StatusLabel = BossTab:AddLabel("Status: Waiting for Halloween Boss"),
+        BossLabel = BossTab:AddLabel("Halloween Boss: None"),
+        HealthLabel = BossTab:AddLabel("Health: 0 / 0"),
+        Data = { Running = false, Generation = 0, LastPunch = 0, Bosses = { GrimReaper = "Grim Reaper", FrankenBrute = "Frankenbrute", PumpkinTitan = "Pumpkin Titan", ScarecrowColossus = "Scarecrow Colossus" }, SelectedBosses = {} }
+    }
+
+    BossTab:AddSection("Selección Halloween Bosses")
+    for id, name in pairs(BossTab.Halloween.Data.Bosses) do
+        BossTab.Halloween.Data.SelectedBosses[id] = true
+        BossTab:CreateToggle({ Name = "Farm " .. name, Default = true }, function(state) BossTab.Halloween.Data.SelectedBosses[id] = state end)
+    end
+
+    BossTab.Halloween.findActiveBoss = function()
+        for _, candidate in ipairs(services.collectionservice:GetTagged("HalloweenBoss")) do
+            if candidate:IsA("Model") and candidate:IsDescendantOf(Workspace) then
+                local hp = tonumber(candidate:GetAttribute("Health")) or 0
+                local maxHp = tonumber(candidate:GetAttribute("MaxHealth")) or hp
+                local bossId = candidate:GetAttribute("BossId") or candidate.Name
+                local hitbox = candidate:FindFirstChild("BossDamageHitbox", true) or candidate.PrimaryPart or candidate:FindFirstChild("HumanoidRootPart")
+                if hp > 0 and hitbox and BossTab.Halloween.Data.SelectedBosses[bossId] ~= false then
+                    return candidate, hitbox, hp, maxHp, bossId
+                end
+            end
+        end
+    end
+
+    BossTab.Halloween.AutoFarmSwitch = BossTab:AddSwitch("Auto Farm Halloween Boss", function(state)
+        BossTab.Halloween.Data.Running = state
+        BossTab.Halloween.Data.Generation = BossTab.Halloween.Data.Generation + 1
+        local gen = BossTab.Halloween.Data.Generation
+        if state then
+            task.spawn(function()
+                while BossTab.Halloween.Data.Running and BossTab.Halloween.Data.Generation == gen do
+                    pcall(function()
+                        local model, hitbox, hp, maxHp, bossId = BossTab.Halloween.findActiveBoss()
+                        if model and hitbox then
+                            BossTab.Halloween.StatusLabel.Text = "Status: Fighting"
+                            BossTab.Halloween.BossLabel.Text = "Halloween Boss: " .. (BossTab.Halloween.Data.Bosses[bossId] or bossId)
+                            BossTab.Halloween.HealthLabel.Text = "Health: " .. formatCurrentStat(hp) .. " / " .. formatCurrentStat(maxHp)
+
+                            local char = LP.Character
+                            if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChildOfClass("Humanoid").Health > 0 then
+                                local root = char.HumanoidRootPart
+                                local headPos = hitbox.Position + Vector3.new(0, hitbox.Size.Y * 0.35, 0)
+                                root.CFrame = CFrame.lookAt(headPos + Vector3.new(0, 65, 0), headPos)
+                                root.AssemblyLinearVelocity = Vector3.zero
+
+                                local backpack = LP:FindFirstChild("Backpack")
+                                local punch = char:FindFirstChild("Punch") or (backpack and backpack:FindFirstChild("Punch"))
+                                if punch and punch.Parent == backpack then char.Humanoid:EquipTool(punch) end
+
+                                if os.clock() - BossTab.Halloween.Data.LastPunch >= 0.01 then
+                                    BossTab.Halloween.Data.LastPunch = os.clock()
+                                    if LP:FindFirstChild("muscleEvent") then
+                                        LP.muscleEvent:FireServer("punch", "leftHand")
+                                        LP.muscleEvent:FireServer("punch", "rightHand")
+                                    end
+                                    if punch and punch.Parent == char then punch:Activate() end
+                                end
+                            end
+                        else
+                            BossTab.Halloween.StatusLabel.Text = "Status: Waiting for Halloween Boss"
+                            BossTab.Halloween.BossLabel.Text = "Halloween Boss: None"
+                            BossTab.Halloween.HealthLabel.Text = "Health: 0 / 0"
+                        end
+                    end)
+                    task.wait(0.02)
+                end
+            end)
+        end
+    end)
+
+    -- TELEPORT ZONES
+    TeleportTab:AddSection("Zonas del Mapa")
+    local function tpTo(cf, name)
+        pcall(function()
+            local char = LP.Character or LP.CharacterAdded:Wait()
+            local root = char:WaitForChild("HumanoidRootPart")
+            root.CFrame = cf
+            StarterGui:SetCore("SendNotification", { Title = "Teletransporte", Text = "Teleported to " .. name, Duration = 3 })
+        end)
+    end
+
+    TeleportTab:AddButton("Spawn", function() tpTo(CFrame.new(2, 8, 115), "Spawn") end)
+    TeleportTab:AddButton("Secret Area", function() tpTo(CFrame.new(1947, 2, 6191), "Secret Area") end)
+    TeleportTab:AddButton("Tiny Island", function() tpTo(CFrame.new(-34, 7, 1903), "Tiny Island") end)
+    TeleportTab:AddButton("Frozen Island", function() tpTo(CFrame.new(-2600.00244, 3.67686558, -403.884369), "Frozen Island") end)
+    TeleportTab:AddButton("Mythical Island", function() tpTo(CFrame.new(2255, 7, 1071), "Mythical Island") end)
+    TeleportTab:AddButton("Eternal Island", function() tpTo(CFrame.new(-6768, 7, -1287), "Eternal Island") end)
+    TeleportTab:AddButton("Legend Island", function() tpTo(CFrame.new(4604, 991, -3887), "Legend Island") end)
+    TeleportTab:AddButton("Muscle King Island", function() tpTo(CFrame.new(-8748, 123, -5865), "Muscle King") end)
+    TeleportTab:AddButton("Jungle Island", function() tpTo(CFrame.new(-8659, 6, 2384), "Jungle Island") end)
+    TeleportTab:AddButton("Industrial Gym", function() tpTo(CFrame.new(-5563.23, 60.47, 4942.44), "Industrial Gym") end)
+    TeleportTab:AddButton("Halloween Gym", function() tpTo(CFrame.new(5558, 86, 5838), "Halloween Gym") end)
+
+    -- SETTINGS
+    SettingsTab:AddSection("Protección y Anti-Cheat")
+    SettingsTab:CreateToggle({ Name = "Anti-Cheat / Kick Protection", Default = AntiCheatActive }, function(state) AntiCheatActive = state SaveConfig() end)
+    SettingsTab:CreateToggle({ Name = "Auto Execute", Default = AutoExecuteActive }, function(state) AutoExecuteActive = state SaveConfig() end)
+    SettingsTab:CreateToggle({ Name = "Auto Rejoin", Default = AutoRejoinActive }, function(state) AutoRejoinActive = state SaveConfig() end)
+end
+
 VerifyBtn.MouseButton1Click:Connect(function()
     if TextBox.Text == CORRECT_KEY then
         StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 150)
         StatusLabel.Text = "¡Key Correcta! Cargando script... 🎉"
         task.wait(1)
         KeyScreenGui:Destroy()
-        
-        -- ==================== 3. SCRIPT PRINCIPAL ====================
-        local Strength = LP.leaderstats:WaitForChild("Strength")
-        local Rebirths = LP.leaderstats:WaitForChild("Rebirths")
-
-        local FastFarm800 = false
-        local FastFarm1k5k = false
-        local AutoRebirth = false
-        local RebirthsCombination = false
-        local RebirthChaos = false
-        local RebirthsTitans = false
-        local AutoTPMuscleFarming = false
-        local AutoTPMuscleRebirth = false
-        local MuscleKingCF = CFrame.new(-8714, 17.5, -5723)
-        local AutoRejoinActive = true
-        local AutoExecuteActive = true
-        local RedactNameActive = false
-        local AntiCheatActive = true
-        local ConfigFileName = "ERDNPublic_Config.json"
-
-        local function SaveConfig()
-            if type(writefile) == "function" then
-                pcall(function()
-                    local configData = {
-                        AutoExecute = AutoExecuteActive,
-                        AutoRejoin = AutoRejoinActive,
-                        RedactName = RedactNameActive,
-                        AntiCheat = AntiCheatActive
-                    }
-                    writefile(ConfigFileName, HttpService:JSONEncode(configData))
-                end)
-            end
-        end
-
-        local function LoadConfig()
-            if type(readfile) == "function" and type(isfile) == "function" then
-                pcall(function()
-                    if isfile(ConfigFileName) then
-                        local savedData = HttpService:JSONEncode(readfile(ConfigFileName))
-                        if type(savedData) == "table" then
-                            AutoExecuteActive = savedData.AutoExecute == true
-                            AutoRejoinActive = savedData.AutoRejoin == true
-                            RedactNameActive = savedData.RedactName == true
-                            AntiCheatActive = savedData.AntiCheat == true
-                        end
-                    end
-                end)
-            end
-        end
-        LoadConfig()
-
-        local nameVisibilityState = {Character = nil, Connections = {}, Guis = {}, Watches = {}}
-        local function clearNameVisibility()
-            local state = nameVisibilityState
-            for _, connection in ipairs(state.Connections) do connection:Disconnect() end
-            table.clear(state.Connections)
-            for gui, connection in pairs(state.Watches) do connection:Disconnect() state.Watches[gui] = nil end
-            for gui, wasEnabled in pairs(state.Guis) do if gui.Parent then gui.Enabled = wasEnabled end end
-            table.clear(state.Guis)
-            state.Character = nil
-        end
-
-        local function applyNameVisibility()
-            local state = nameVisibilityState
-            local character = LP.Character
-            if state.Character ~= character then
-                clearNameVisibility()
-                state.Character = character
-                if character then
-                    local function watchNameGui(gui)
-                        if not gui:IsA("BillboardGui") or gui.Name ~= "nameGui" or state.Guis[gui] ~= nil then return end
-                        state.Guis[gui] = gui.Enabled
-                        state.Watches[gui] = gui:GetPropertyChangedSignal("Enabled"):Connect(function()
-                            if RedactNameActive and gui.Enabled then gui.Enabled = false end
-                        end)
-                        if RedactNameActive then gui.Enabled = false end
-                    end
-                    table.insert(state.Connections, character.DescendantAdded:Connect(watchNameGui))
-                    table.insert(state.Connections, character.DescendantRemoving:Connect(function(gui)
-                        if state.Guis[gui] ~= nil then
-                            local connection = state.Watches[gui]
-                            if connection then connection:Disconnect() end
-                            state.Watches[gui] = nil
-                            gui.Enabled = state.Guis[gui]
-                            state.Guis[gui] = nil
-                        end
-                    end))
-                    for _, gui in ipairs(character:GetDescendants()) do watchNameGui(gui) end
-                end
-            end
-            for gui, wasEnabled in pairs(state.Guis) do
-                if gui.Parent then gui.Enabled = not RedactNameActive and wasEnabled end
-            end
-        end
-
-        LP.CharacterAdded:Connect(function()
-            applyNameVisibility()
-        end)
-
-        local oldNamecall
-        oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-            local method = getnamecallmethod()
-            if AntiCheatActive and method == "Kick" and self == LP then
-                return
-            end
-            return oldNamecall(self, ...)
-        end)
-
-        CoreGui.RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(child)
-            if AutoRejoinActive and (child.Name == "ErrorPrompt" or child:FindFirstChild("ErrorTitle")) then
-                pcall(function()
-                    StarterGui:SetCore("SendNotification", {
-                        Title = "ERDN Public",
-                        Text = "Reconectando al servidor... 🔄",
-                        Duration = 5
-                    })
-                end)
-                task.wait(1)
-                TeleportService:Teleport(game.PlaceId, LP)
-            end
-        end)
-
-        local PETS = {
-            ["Omega Overlord"] = { repSpeed = 20, strength = 0, durability = 0, rebirth = 0 },
-            ["Swift Samurai"] = { repSpeed = 15, strength = 0, durability = 0, rebirth = 0 },
-            ["Powercore Hound"] = { repSpeed = 0, strength = 25, durability = 15, rebirth = 0 },
-            ["Titanium Hydra"] = { repSpeed = 0, strength = 0, durability = 0, rebirth = 2 },
-            ["Tribal Overlord"] = { repSpeed = 0, strength = 0, durability = 0, rebirth = 2 },
-            ["Inferno Unicorn"] = { repSpeed = 0, strength = 25, durability = 25, rebirth = 0 },
-            ["Common Boss Pet"] = { repSpeed = 5, strength = 0, durability = 0, rebirth = 0 },
-            ["Rare Boss Pet"] = { repSpeed = 7, strength = 0, durability = 0, rebirth = 0 },
-            ["Epic Boss Pet"] = { repSpeed = 10, strength = 0, durability = 0, rebirth = 0 },
-            ["Rainbow Boss Pet"] = { repSpeed = 10, strength = 7, durability = 0, rebirth = 0 },
-            ["Legendary Boss Pet"] = { repSpeed = 10, strength = 10, durability = 0, rebirth = 0 },
-            ["Mythic Boss Pet"] = { repSpeed = 10, strength = 20, durability = 0, rebirth = 0 },
-            ["Inferno Drake"] = { repSpeed = 40, strength = 0, durability = 0, rebirth = 0 },
-        }
-
-        local MAX_PET_SLOTS = 12
-
-        local function applyPetLoadout(selected, isCurrent)
-            local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
-            local remote = rEvents and rEvents:FindFirstChild("equipPetEvent")
-            if not remote then return false end
-
-            local petsFolder = LP:FindFirstChild("petsFolder")
-            if petsFolder then
-                for _, folder in ipairs(petsFolder:GetChildren()) do
-                    if folder:IsA("Folder") then
-                        for _, pet in ipairs(folder:GetChildren()) do
-                            if isCurrent and not isCurrent() then return false end
-                            remote:FireServer("unequipPet", pet)
-                        end
-                    end
-                end
-            end
-            task.wait(0.05)
-            for _, pet in ipairs(selected) do
-                if isCurrent and not isCurrent() then return false end
-                remote:FireServer("equipPet", pet)
-            end
-            return not isCurrent or isCurrent()
-        end
-
-        local function sendTrainingReps(state, rate, maxBurst, canSend)
-            local now = os.clock()
-            local elapsed = math.clamp(now - (state.LastAt or now), 0, 0.1)
-            state.LastAt = now
-            state.Tokens = math.min(maxBurst, (state.Tokens or 0) + rate * elapsed)
-            local sent = 0
-            local muscleEvent = LP:FindFirstChild("muscleEvent")
-            while state.Tokens >= 1 and canSend() and muscleEvent do
-                muscleEvent:FireServer("rep")
-                state.Tokens = state.Tokens - 1
-                sent = sent + 1
-            end
-            return sent
-        end
-
-        local function createFarmLoop(getState, rate, burst)
-            task.spawn(function()
-                local cachedEvent = LP:FindFirstChild("muscleEvent")
-                LP.ChildAdded:Connect(function(child)
-                    if child.Name == "muscleEvent" then cachedEvent = child end
-                end)
-                local INTERVAL = burst / rate
-                while true do
-                    if getState() then
-                        if not cachedEvent or not cachedEvent.Parent then
-                            cachedEvent = LP:FindFirstChild("muscleEvent")
-                        end
-                        if cachedEvent then
-                            local start = os.clock()
-                            for i = 1, burst do
-                                if not getState() then break end
-                                pcall(function() cachedEvent:FireServer("rep") end)
-                            end
-                            local remaining = INTERVAL - (os.clock() - start)
-                            if remaining > 0 then task.wait(remaining) else task.wait(0.02) end
-                        else
-                            task.wait(0.05)
-                        end
-                    else
-                        task.wait(0.15)
-                    end
-                end
-            end)
-        end
-
-        createFarmLoop(function() return FastFarm800 end, 800, 60)
-        createFarmLoop(function() return FastFarm1k5k end, 1200, 100)
-
-        local Library = {}
-        local function Create(className, properties, parent)
-            local instance = Instance.new(className)
-            for property, value in pairs(properties) do
-                instance[property] = value
-            end
-            if parent then instance.Parent = parent end
-            return instance
-        end
-
-        local function MakeDraggable(dragBar, object)
-            local dragging, dragStart, startPos
-            dragBar.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                    dragging = true
-                    dragStart = input.Position
-                    startPos = object.Position
-                    input.Changed:Connect(function()
-                        if input.UserInputState == Enum.UserInputState.End then dragging = false end
-                    end)
-                end
-            end)
-            UserInputService.InputChanged:Connect(function(input)
-                if not dragging then return end
-                if input.UserInputType ~= Enum.UserInputType.MouseMovement and input.UserInputType ~= Enum.UserInputType.Touch then return end
-                local delta = input.Position - dragStart
-                object.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-            end)
-        end
-
-        function Library:CreateWindow(config)
-            local WindowObj = {}
-            local windowTitle = config.Title or "👑 ERDN Public"
-            local parentUIContainer = (gethui and gethui()) or CoreGui or LP:WaitForChild("PlayerGui")
-            if parentUIContainer:FindFirstChild("ERDN_PublicUI") then
-                parentUIContainer.ERDN_PublicUI:Destroy()
-            end
-
-            local ScreenGui = Create("ScreenGui", {
-                Name = "ERDN_PublicUI",
-                ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-                IgnoreGuiInset = true
-            }, parentUIContainer)
-
-            local MainFrame = Create("Frame", {
-                Name = "MainFrame",
-                BackgroundColor3 = Color3.fromRGB(18, 18, 22),
-                BackgroundTransparency = 0.25,
-                BorderSizePixel = 0,
-                Position = UDim2.new(0.5, 0, 0.5, 0),
-                Size = UDim2.new(0, 580, 0, 360),
-                AnchorPoint = Vector2.new(0.5, 0.5)
-            }, ScreenGui)
-
-            Create("UICorner", {CornerRadius = UDim.new(0, 12)}, MainFrame)
-            Create("UIStroke", {Color = Color3.fromRGB(120, 80, 255), Thickness = 1.5, Transparency = 0.2}, MainFrame)
-
-            local MiniButton = Create("TextButton", {
-                Name = "ERDN_Mini",
-                Size = UDim2.new(0, 140, 0, 38),
-                Position = UDim2.new(1, -155, 0, 15),
-                BackgroundColor3 = Color3.fromRGB(22, 22, 30),
-                BackgroundTransparency = 0.25,
-                BorderSizePixel = 0,
-                Text = windowTitle,
-                TextColor3 = Color3.fromRGB(235, 235, 255),
-                Font = Enum.Font.GothamBold,
-                TextSize = 12,
-                Visible = false,
-                AutoButtonColor = false
-            }, ScreenGui)
-
-            Create("UICorner", {CornerRadius = UDim.new(0, 10)}, MiniButton)
-            Create("UIStroke", {Color = Color3.fromRGB(120, 80, 255), Thickness = 1.5}, MiniButton)
-
-            local TopBar = Create("Frame", {
-                Name = "TopBar",
-                BackgroundColor3 = Color3.fromRGB(12, 12, 16),
-                BackgroundTransparency = 0.35,
-                BorderSizePixel = 0,
-                Size = UDim2.new(1, 0, 0, 32)
-            }, MainFrame)
-
-            Create("UICorner", {CornerRadius = UDim.new(0, 12)}, TopBar)
-            Create("Frame", {
-                BackgroundColor3 = Color3.fromRGB(12, 12, 16),
-                BackgroundTransparency = 0.35,
-                BorderSizePixel = 0,
-                Position = UDim2.new(0, 0, 1, -5),
-                Size = UDim2.new(1, 0, 0, 5)
-            }, TopBar)
-
-            MakeDraggable(TopBar, MainFrame)
-
-            local CloseBtn = Create("TextButton", {
-                Size = UDim2.new(0, 24, 0, 24),
-                Position = UDim2.new(1, -30, 0, 4),
-                BackgroundColor3 = Color3.fromRGB(30, 30, 38),
-                BackgroundTransparency = 0.35,
-                Text = "×",
-                TextColor3 = Color3.fromRGB(180, 180, 200),
-                Font = Enum.Font.GothamBold,
-                TextSize = 16
-            }, TopBar)
-            Create("UICorner", {CornerRadius = UDim.new(0, 6)}, CloseBtn)
-            CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
-
-            local MinimizeBtn = Create("TextButton", {
-                Size = UDim2.new(0, 24, 0, 24),
-                Position = UDim2.new(1, -60, 0, 4),
-                BackgroundColor3 = Color3.fromRGB(30, 30, 38),
-                BackgroundTransparency = 0.35,
-                Text = "-",
-                TextColor3 = Color3.fromRGB(210, 210, 225),
-                Font = Enum.Font.GothamBold,
-                TextSize = 16
-            }, TopBar)
-            Create("UICorner", {CornerRadius = UDim.new(0, 6)}, MinimizeBtn)
-
-            MinimizeBtn.MouseButton1Click:Connect(function()
-                MainFrame.Visible = false
-                MiniButton.Visible = true
-            end)
-
-            MiniButton.MouseButton1Click:Connect(function()
-                MiniButton.Visible = false
-                MainFrame.Visible = true
-            end)
-
-            local Container = Create("Frame", {
-                Name = "Container",
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, 0, 0, 32),
-                Size = UDim2.new(1, 0, 1, -32)
-            }, MainFrame)
-
-            local Sidebar = Create("Frame", {
-                Name = "Sidebar",
-                BackgroundColor3 = Color3.fromRGB(12, 12, 16),
-                BackgroundTransparency = 0.35,
-                BorderSizePixel = 0,
-                Position = UDim2.new(0, 0, 0, 0),
-                Size = UDim2.new(0, 140, 1, 0)
-            }, Container)
-            Create("UICorner", {CornerRadius = UDim.new(0, 12)}, Sidebar)
-
-            local AvatarImage = Create("ImageLabel", {
-                Name = "AvatarImage",
-                BackgroundColor3 = Color3.fromRGB(25, 24, 32),
-                BorderSizePixel = 0,
-                Position = UDim2.new(0, 12, 0, 12),
-                Size = UDim2.new(0, 36, 0, 36),
-                Image = Players:GetUserThumbnailAsync(LP.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
-            }, Sidebar)
-            Create("UICorner", {CornerRadius = UDim.new(1, 0)}, AvatarImage)
-
-            Create("Frame", {
-                BackgroundColor3 = Color3.fromRGB(28, 28, 36),
-                BackgroundTransparency = 0.5,
-                BorderSizePixel = 0,
-                Position = UDim2.new(0, 12, 0, 56),
-                Size = UDim2.new(1, -24, 0, 1)
-            }, Sidebar)
-
-            local NavContainer = Create("ScrollingFrame", {
-                Name = "NavContainer",
-                Size = UDim2.new(1, -6, 1, -64),
-                Position = UDim2.new(0, 3, 0, 62),
-                BackgroundTransparency = 1,
-                BorderSizePixel = 0,
-                ScrollBarThickness = 3,
-                ScrollBarImageColor3 = Color3.fromRGB(120, 80, 255),
-                CanvasSize = UDim2.new(0, 0, 0, 0)
-            }, Sidebar)
-
-            local navLayout = Create("UIListLayout", {
-                Padding = UDim.new(0, 5),
-                SortOrder = Enum.SortOrder.LayoutOrder
-            }, NavContainer)
-
-            navLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                NavContainer.CanvasSize = UDim2.new(0, 0, 0, navLayout.AbsoluteContentSize.Y + 10)
-            end)
-
-            local ContentContainer = Create("Frame", {
-                Name = "ContentContainer",
-                Size = UDim2.new(1, -145, 1, 0),
-                Position = UDim2.new(0, 145, 0, 0),
-                BackgroundTransparency = 1
-            }, Container)
-
-            local pages = {}
-            local navButtons = {}
-            local firstTab = true
-
-            local emojiMap = {
-                ["Principal"] = "🏠",
-                ["Farming"] = "🏋️",
-                ["Rebirth"] = "🌌",
-                ["Auto Rocks"] = "⛰️",
-                ["Auto Gym"] = "🏋️‍♂️",
-                ["Stats"] = "📊",
-                ["Gift"] = "🎁",
-                ["Boss"] = "👹",
-                ["Teleport"] = "🌀",
-                ["Settings"] = "⚙️"
-            }
-
-            function WindowObj:CreateTab(name, iconChar, subTitleText)
-                local finalIcon = iconChar or emojiMap[name] or name:sub(1, 1)
-
-                local btn = Create("TextButton", {
-                    Name = name .. "TabBtn",
-                    Size = UDim2.new(1, -6, 0, 32),
-                    BackgroundColor3 = Color3.fromRGB(12, 12, 16),
-                    BackgroundTransparency = 0.5,
-                    BorderSizePixel = 0,
-                    Text = "",
-                    AutoButtonColor = false
-                }, NavContainer)
-                Create("UICorner", {CornerRadius = UDim.new(0, 8)}, btn)
-
-                local iconLabel = Create("TextLabel", {
-                    Name = "IconLabel",
-                    Size = UDim2.new(0, 20, 1, 0),
-                    Position = UDim2.new(0, 8, 0, 0),
-                    BackgroundTransparency = 1,
-                    Text = finalIcon,
-                    TextColor3 = Color3.fromRGB(160, 160, 180),
-                    Font = Enum.Font.GothamBold,
-                    TextSize = 11
-                }, btn)
-
-                local textLabel = Create("TextLabel", {
-                    Name = "TextLabel",
-                    Size = UDim2.new(1, -32, 1, 0),
-                    Position = UDim2.new(0, 28, 0, 0),
-                    BackgroundTransparency = 1,
-                    Text = name,
-                    TextColor3 = Color3.fromRGB(180, 180, 200),
-                    Font = Enum.Font.GothamMedium,
-                    TextSize = 11,
-                    TextXAlignment = Enum.TextXAlignment.Left
-                }, btn)
-
-                local indicator = Create("Frame", {
-                    Name = "Indicator",
-                    Size = UDim2.new(0, 3, 0, 18),
-                    Position = UDim2.new(0, 0, 0.5, -9),
-                    BackgroundColor3 = Color3.fromRGB(120, 80, 255),
-                    BorderSizePixel = 0,
-                    Visible = false
-                }, btn)
-                Create("UICorner", {CornerRadius = UDim.new(0, 2)}, indicator)
-
-                local page = Create("ScrollingFrame", {
-                    Name = name .. "Page",
-                    Size = UDim2.new(1, -16, 1, -12),
-                    Position = UDim2.new(0, 8, 0, 6),
-                    BackgroundTransparency = 1,
-                    BorderSizePixel = 0,
-                    ScrollBarThickness = 3,
-                    ScrollBarImageColor3 = Color3.fromRGB(120, 80, 255),
-                    CanvasSize = UDim2.new(0, 0, 0, 0),
-                    Visible = false
-                }, ContentContainer)
-
-                local pageLayout = Create("UIListLayout", {
-                    Padding = UDim.new(0, 8),
-                    SortOrder = Enum.SortOrder.LayoutOrder
-                }, page)
-
-                pageLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                    page.CanvasSize = UDim2.new(0, 0, 0, pageLayout.AbsoluteContentSize.Y + 15)
-                end)
-
-                Create("TextLabel", {
-                    Size = UDim2.new(1, 0, 0, 22),
-                    BackgroundTransparency = 1,
-                    Text = finalIcon .. "  " .. name,
-                    TextColor3 = Color3.fromRGB(255, 255, 255),
-                    Font = Enum.Font.GothamBold,
-                    TextSize = 18,
-                    TextXAlignment = Enum.TextXAlignment.Left,
-                    LayoutOrder = -2
-                }, page)
-
-                if subTitleText then
-                    Create("TextLabel", {
-                        Size = UDim2.new(1, 0, 0, 16),
-                        BackgroundTransparency = 1,
-                        Text = subTitleText,
-                        TextColor3 = Color3.fromRGB(140, 140, 160),
-                        Font = Enum.Font.Gotham,
-                        TextSize = 11,
-                        TextXAlignment = Enum.TextXAlignment.Left,
-                        LayoutOrder = -1
-                    }, page)
-                end
-
-                table.insert(navButtons, {
-                    Button = btn,
-                    Indicator = indicator,
-                    Icon = iconLabel,
-                    Text = textLabel
-                })
-
-                if firstTab then
-                    firstTab = false
-                    page.Visible = true
-                    btn.BackgroundColor3 = Color3.fromRGB(28, 24, 45)
-                    btn.BackgroundTransparency = 0.25
-                    indicator.Visible = true
-                    iconLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-                end
-
-                btn.MouseButton1Click:Connect(function()
-                    for _, p in pairs(pages) do p.Visible = false end
-                    page.Visible = true
-
-                    for _, navItem in ipairs(navButtons) do
-                        navItem.Button.BackgroundColor3 = Color3.fromRGB(12, 12, 16)
-                        navItem.Button.BackgroundTransparency = 0.5
-                        navItem.Indicator.Visible = false
-                        navItem.Icon.TextColor3 = Color3.fromRGB(160, 160, 180)
-                        navItem.Text.TextColor3 = Color3.fromRGB(180, 180, 200)
-                    end
-
-                    btn.BackgroundColor3 = Color3.fromRGB(28, 24, 45)
-                    btn.BackgroundTransparency = 0.25
-                    indicator.Visible = true
-                    iconLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-                end)
-
-                pages[name] = page
-
-                local TabMethods = {}
-
-                function TabMethods:AddSection(secText)
-                    return Create("TextLabel", {
-                        Size = UDim2.new(1, 0, 0, 24),
-                        BackgroundTransparency = 1,
-                        Text = string.upper(secText),
-                        TextColor3 = Color3.fromRGB(150, 120, 230),
-                        Font = Enum.Font.GothamBold,
-                        TextSize = 12,
-                        TextXAlignment = Enum.TextXAlignment.Left
-                    }, page)
-                end
-
-                function TabMethods:AddHeading(text)
-                    return self:AddSection(text)
-                end
-
-                function TabMethods:AddLabel(text)
-                    return Create("TextLabel", {
-                        Size = UDim2.new(1, 0, 0, 20),
-                        BackgroundTransparency = 1,
-                        Text = text,
-                        TextColor3 = Color3.fromRGB(210, 210, 225),
-                        Font = Enum.Font.GothamMedium,
-                        TextSize = 12,
-                        TextXAlignment = Enum.TextXAlignment.Left,
-                        TextTruncate = Enum.TextTruncate.AtEnd
-                    }, page)
-                end
-
-                function TabMethods:CreateToggle(config, callback)
-                    local titleText = config.Name or "Toggle"
-                    local descText = config.Description or ""
-                    local defaultState = config.Default or false
-                    local currentState = defaultState
-
-                    local row = Create("Frame", {
-                        Size = UDim2.new(1, -6, 0, descText ~= "" and 52 or 40),
-                        BackgroundColor3 = Color3.fromRGB(24, 24, 30),
-                        BackgroundTransparency = 0.35,
-                        BorderSizePixel = 0
-                    }, page)
-                    Create("UICorner", {CornerRadius = UDim.new(0, 8)}, row)
-
-                    Create("TextLabel", {
-                        Size = UDim2.new(1, -75, 0, 20),
-                        Position = UDim2.new(0, 12, 0, descText ~= "" and 8 or 10),
-                        BackgroundTransparency = 1,
-                        Text = titleText,
-                        TextColor3 = Color3.fromRGB(240, 240, 250),
-                        Font = Enum.Font.GothamBold,
-                        TextSize = 13,
-                        TextXAlignment = Enum.TextXAlignment.Left
-                    }, row)
-
-                    if descText ~= "" then
-                        Create("TextLabel", {
-                            Size = UDim2.new(1, -75, 0, 16),
-                            Position = UDim2.new(0, 12, 0, 28),
-                            BackgroundTransparency = 1,
-                            Text = descText,
-                            TextColor3 = Color3.fromRGB(130, 130, 150),
-                            Font = Enum.Font.Gotham,
-                            TextSize = 10,
-                            TextXAlignment = Enum.TextXAlignment.Left
-                        }, row)
-                    end
-
-                    local switchBg = Create("Frame", {
-                        Size = UDim2.new(0, 42, 0, 24),
-                        Position = UDim2.new(1, -52, 0.5, -12),
-                        BackgroundColor3 = currentState and Color3.fromRGB(100, 70, 220) or Color3.fromRGB(50, 50, 60),
-                        BorderSizePixel = 0
-                    }, row)
-                    Create("UICorner", {CornerRadius = UDim.new(1, 0)}, switchBg)
-
-                    local knob = Create("Frame", {
-                        Size = UDim2.new(0, 18, 0, 18),
-                        Position = currentState and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9),
-                        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-                        BorderSizePixel = 0
-                    }, switchBg)
-                    Create("UICorner", {CornerRadius = UDim.new(1, 0)}, knob)
-
-                    local clickBtn = Create("TextButton", {
-                        Size = UDim2.new(1, 0, 1, 0),
-                        BackgroundTransparency = 1,
-                        Text = ""
-                    }, row)
-
-                    clickBtn.MouseButton1Click:Connect(function()
-                        currentState = not currentState
-                        local tweenInfo = TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                        if currentState then
-                            TweenService:Create(switchBg, tweenInfo, {BackgroundColor3 = Color3.fromRGB(100, 70, 220)}):Play()
-                            TweenService:Create(knob, tweenInfo, {Position = UDim2.new(1, -21, 0.5, -9)}):Play()
-                        else
-                            TweenService:Create(switchBg, tweenInfo, {BackgroundColor3 = Color3.fromRGB(50, 50, 60)}):Play()
-                            TweenService:Create(knob, tweenInfo, {Position = UDim2.new(0, 3, 0.5, -9)}):Play()
-                        end
-                        pcall(callback, currentState)
-                    end)
-
-                    if defaultState then pcall(callback, true) end
-
-                    return {
-                        Set = function(self, val)
-                            if currentState ~= val then
-                                currentState = val
-                                local tweenInfo = TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                                if currentState then
-                                    TweenService:Create(switchBg, tweenInfo, {BackgroundColor3 = Color3.fromRGB(100, 70, 220)}):Play()
-                                    TweenService:Create(knob, tweenInfo, {Position = UDim2.new(1, -21, 0.5, -9)}):Play()
-                                else
-                                    TweenService:Create(switchBg, tweenInfo, {BackgroundColor3 = Color3.fromRGB(50, 50, 60)}):Play()
-                                    TweenService:Create(knob, tweenInfo, {Position = UDim2.new(0, 3, 0.5, -9)}):Play()
-                                end
-                                pcall(callback, currentState)
-                            end
-                        end
-                    }
-                end
-
-                function TabMethods:AddButton(text, callback)
-                    local btn = Create("TextButton", {
-                        Size = UDim2.new(1, -6, 0, 36),
-                        BackgroundColor3 = Color3.fromRGB(28, 24, 45),
-                        BackgroundTransparency = 0.35,
-                        BorderSizePixel = 0,
-                        Text = text,
-                        TextColor3 = Color3.fromRGB(235, 235, 255),
-                        Font = Enum.Font.GothamBold,
-                        TextSize = 12,
-                        AutoButtonColor = true
-                    }, page)
-                    Create("UICorner", {CornerRadius = UDim.new(0, 8)}, btn)
-
-                    btn.MouseButton1Click:Connect(function()
-                        pcall(callback)
-                    end)
-                    return btn
-                end
-
-                function TabMethods:AddTextBox(placeholder, callback)
-                    local row = Create("Frame", {
-                        Size = UDim2.new(1, -6, 0, 38),
-                        BackgroundColor3 = Color3.fromRGB(24, 24, 30),
-                        BackgroundTransparency = 0.35,
-                        BorderSizePixel = 0
-                    }, page)
-                    Create("UICorner", {CornerRadius = UDim.new(0, 8)}, row)
-
-                    local box = Create("TextBox", {
-                        Size = UDim2.new(1, -20, 1, 0),
-                        Position = UDim2.new(0, 10, 0, 0),
-                        BackgroundTransparency = 1,
-                        PlaceholderText = placeholder or "Escribe aquí...",
-                        Text = "",
-                        TextColor3 = Color3.fromRGB(240, 240, 250),
-                        PlaceholderColor3 = Color3.fromRGB(120, 120, 140),
-                        Font = Enum.Font.GothamMedium,
-                        TextSize = 12,
-                        TextXAlignment = Enum.TextXAlignment.Left
-                    }, row)
-
-                    box.FocusLost:Connect(function(enterPressed)
-                        pcall(callback, box.Text)
-                    end)
-
-                    return box
-                end
-
-                return TabMethods
-            end
-
-            return WindowObj
-        end
-
-        local Window = Library:CreateWindow({
-            Title = "👑 ERDN Public",
-            Icon = "rbxassetid://6031097225"
-        })
-
-        local PrincipalTab = Window:CreateTab("Principal", "🏠", "Bienvenido al script")
-        local FarmingTab = Window:CreateTab("Farming", "🏋️", "Fast Fuerza")
-        local RebirthTab = Window:CreateTab("Rebirth", "🌌", "Fast Renacimientos")
-        local RocksTab = Window:CreateTab("Auto Rocks", "⛰️", "Farm Rocks")
-        local AutoGymTab = Window:CreateTab("Auto Gym", "🏋️‍♂️", "Gimnasio Automático")
-        local StatsTab = Window:CreateTab("Stats", "📊", "Estadisticas")
-        local GiftTab = Window:CreateTab("Gift", "🎁", "Regala eggs")
-        local BossTab = Window:CreateTab("Boss", "👹", "Sistema de Bosses")
-        local TeleportTab = Window:CreateTab("Teleport", "🌀", "TPs")
-        local SettingsTab = Window:CreateTab("Settings", "⚙️", "Configuración")
-
-        local function formatNumber(number)
-            local isNegative = number < 0
-            number = math.abs(number)
-            if number >= 1e18 then return (isNegative and "-" or "") .. string.format("%.2fQi", number / 1e18)
-            elseif number >= 1e15 then return (isNegative and "-" or "") .. string.format("%.2fQa", number / 1e15)
-            elseif number >= 1e12 then return (isNegative and "-" or "") .. string.format("%.2fT", number / 1e12)
-            elseif number >= 1e9 then return (isNegative and "-" or "") .. string.format("%.2fB", number / 1e9)
-            elseif number >= 1e6 then return (isNegative and "-" or "") .. string.format("%.2fM", number / 1e6)
-            elseif number >= 1e3 then return (isNegative and "-" or "") .. string.format("%.2fK", number / 1e3)
-            else return (isNegative and "-" or "") .. string.format("%.0f", number) end
-        end
-
-        local function formatCurrentStat(val)
-            return tostring(val or 0)
-        end
-
-        PrincipalTab:AddSection("Utilidades")
-        PrincipalTab:CreateToggle({
-            Name = "Hide Name",
-            Description = "Oculta el nombre sobre tu personaje en el juego",
-            Default = RedactNameActive
-        }, function(state)
-            RedactNameActive = state
-            applyNameVisibility()
-            SaveConfig()
-        end)
-
-        PrincipalTab:CreateToggle({
-            Name = "Anti-AFK",
-            Description = "Protección automática contra inactividad",
-            Default = true
-        }, function(state)
-            if state then
-                pcall(function()
-                    StarterGui:SetCore("SendNotification", {
-                        Title = "ERDN Public",
-                        Text = "Anti-AFK Activo 🛡️",
-                        Duration = 3
-                    })
-                end)
-            end
-        end)
-
-        FarmingTab:AddSection("Modos de Farming")
-        FarmingTab:CreateToggle({
-            Name = "Farm 800 Rep/s",
-            Description = "",
-            Default = false
-        }, function(state)
-            FastFarm800 = state
-            if state then FastFarm1k5k = false end
-        end)
-
-        FarmingTab:CreateToggle({
-            Name = "OP Farm 5k Rep/s",
-            Description = "",
-            Default = false
-        }, function(state)
-            FastFarm1k5k = state
-            if state then FastFarm800 = false end
-        end)
-
-        RebirthTab:AddSection("Rebirth")
-        RebirthTab:CreateToggle({
-            Name = "Auto Rebirth",
-            Description = "Rebirths + Strenght",
-            Default = false
-        }, function(state)
-            AutoRebirth = state
-            if state then
-                RebirthsCombination = false
-                RebirthChaos = false
-                RebirthsTitans = false
-            end
-        end)
-
-        -- ==================== AUTO ROCKS ====================
-        RocksTab:AddSection("Farming de Rocas")
-        local activeRock = nil
-        local function getrocktool()
-            local backpack = LP:FindFirstChild("Backpack")
-            local char = LP.Character
-            if backpack and char and char:FindFirstChild("Humanoid") then
-                local punch = backpack:FindFirstChild("Punch") or char:FindFirstChild("Punch")
-                if punch and punch.Parent == backpack then
-                    char.Humanoid:EquipTool(punch)
-                end
-            end
-            pcall(function()
-                if LP:FindFirstChild("muscleEvent") then
-                    LP.muscleEvent:FireServer("punch", "leftHand")
-                    LP.muscleEvent:FireServer("punch", "rightHand")
-                end
-            end)
-        end
-
-        local rockList = {
-            { Name = "Farm Tiny Island Rock", MinDur = 0, DurVal = 0 },
-            { Name = "Farm Starter Island Rock", MinDur = 100, DurVal = 100 },
-            { Name = "Farm Legend Beach Rock", MinDur = 5000, DurVal = 5000 },
-            { Name = "Farm Frost Gym Rock", MinDur = 150000, DurVal = 150000 },
-            { Name = "Farm Mythical Gym Rock", MinDur = 400000, DurVal = 400000 },
-            { Name = "Farm Eternal Gym Rock", MinDur = 750000, DurVal = 750000 },
-            { Name = "Farm Legend Gym Rock", MinDur = 1000000, DurVal = 1000000 },
-            { Name = "Farm Muscle King Gym Rock", MinDur = 5000000, DurVal = 5000000 },
-            { Name = "Farm Ancient Jungle Rock", MinDur = 10000000, DurVal = 10000000 },
-            { Name = "Farm Industrial Jungle Rock", MinDur = 25000000, DurVal = 25000000 },
-            { Name = "Farm Hallowed Rock", MinDur = 0, DurVal = 0 },
-        }
-
-        for _, rockInfo in ipairs(rockList) do
-            RocksTab:CreateToggle({
-                Name = rockInfo.Name,
-                Description = "Requiere " .. rockInfo.MinDur .. " de Durabilidad",
-                Default = false
-            }, function(bool)
-                if bool then
-                    activeRock = rockInfo.Name
-                    task.spawn(function()
-                        while activeRock == rockInfo.Name do
-                            task.wait(0.01)
-                            pcall(function()
-                                local durabilityObj = LP:FindFirstChild("Durability")
-                                if durabilityObj and durabilityObj.Value >= rockInfo.MinDur then
-                                    getrocktool()
-                                    local machinesFolder = workspace:FindFirstChild("machinesFolder")
-                                    if machinesFolder then
-                                        for _, v in pairs(machinesFolder:GetDescendants()) do
-                                            if v.Name == "neededDurability" and v.Value == rockInfo.DurVal then
-                                                local rockPart = v.Parent and v.Parent:FindFirstChild("Rock")
-                                                local char = LP.Character
-                                                if rockPart and char then
-                                                    local rightHand = char:FindFirstChild("RightHand")
-                                                    local leftHand = char:FindFirstChild("LeftHand")
-                                                    if rightHand and leftHand then
-                                                        firetouchinterest(rockPart, rightHand, 0)
-                                                        firetouchinterest(rockPart, rightHand, 1)
-                                                        firetouchinterest(rockPart, leftHand, 0)
-                                                        firetouchinterest(rockPart, leftHand, 1)
-                                                    end
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end)
-                        end
-                    end)
-                else
-                    if activeRock == rockInfo.Name then activeRock = nil end
-                end
-            end)
-        end
-
-        AutoGymTab:AddSection("Próximamente")
-        AutoGymTab:AddLabel("Esta sección estará disponible pronto...")
-
-        -- ==================== STATS ====================
-        StatsTab:AddSection("Estadísticas en Tiempo Real")
-        local stopwatchLabel = StatsTab:AddButton("Fast Rep Time: 0d 0h 0m 0s", function() end)
-        local projectedStrengthLabel = StatsTab:AddButton("Strength Rate: 0/s", function() end)
-        local strengthLabel = StatsTab:AddButton("Strength: 0 | Gained: 0", function() end)
-        local durabilityLabel = StatsTab:AddButton("Durability: 0 | Gained: 0", function() end)
-        local rebirthsCountLabel = StatsTab:AddButton("Rebirths: 0 | Gained: 0", function() end)
-
-        local leaderstats = LP:WaitForChild("leaderstats")
-        local strengthStat = leaderstats:WaitForChild("Strength")
-        local durabilityStat = LP:WaitForChild("Durability")
-        local rebirthsStat = leaderstats:WaitForChild("Rebirths")
-
-        local startTime = tick()
-        local initialStrength = strengthStat.Value
-        local initialDurability = durabilityStat.Value
-        local initialRebirths = rebirthsStat.Value
-
-        task.spawn(function()
-            while true do
-                local currentTime = tick()
-                local elapsedTime = currentTime - startTime
-                local days = math.floor(elapsedTime / (24 * 3600))
-                local hours = math.floor((elapsedTime % (24 * 3600)) / 3600)
-                local minutes = math.floor((elapsedTime % 3600) / 60)
-                local seconds = math.floor(elapsedTime % 60)
-                stopwatchLabel.Text = string.format("Fast Rep Time: %dd %dh %dm %ds", days, hours, minutes, seconds)
-                strengthLabel.Text = "Strength: " .. formatNumber(strengthStat.Value) .. " | Gained: " .. formatNumber(strengthStat.Value - initialStrength)
-                durabilityLabel.Text = "Durability: " .. formatNumber(durabilityStat.Value) .. " | Gained: " .. formatNumber(durabilityStat.Value - initialDurability)
-                rebirthsCountLabel.Text = "Rebirths: " .. tostring(rebirthsStat.Value) .. " | Gained: " .. tostring(rebirthsStat.Value - initialRebirths)
-                task.wait(0.5)
-            end
-        end)
-
-        -- ==================== BOSS (SIN ENTRENAMIENTO PREVIO Y ALTA ELEVACIÓN) ====================
-        BossTab:AddHeading("Boss Farming") 
-        BossTab.StatusLabel = BossTab:AddLabel("Status: Waiting for Boss") 
-        BossTab.BossLabel = BossTab:AddLabel("Boss: None") 
-        BossTab.HealthLabel = BossTab:AddLabel("Health: 0 / 0") 
-        BossTab.NextBossLabel = BossTab:AddLabel("Next Boss: N/A") 
-
-        BossTab.Data = { 	
-            Running = false, 	
-            Generation = 0, 	
-            Phase = "Waiting", 	
-            PunchInterval = 0.01, 
-            LastPunch = 0, 	
-            BossConfig = nil, 	
-            Bosses = {}, 	
-            BossOrder = {}, 	
-            BossByDisplayName = {}, 	
-            SelectedBosses = {} 
-        } 
-
-        BossTab:AddSection("Selección de Jefes (Listado)")
-
-        BossTab.addBossChoice = function(modelName, displayName) 	
-            modelName = tostring(modelName or "") 	
-            displayName = tostring(displayName or modelName) 	
-            if modelName == "" or BossTab.Data.Bosses[modelName] then return end 	
-            BossTab.Data.Bosses[modelName] = displayName 	
-            BossTab.Data.BossByDisplayName[displayName] = modelName 	
-            BossTab.Data.SelectedBosses[modelName] = true 	
-            table.insert(BossTab.Data.BossOrder, modelName) 	
-
-            BossTab:CreateToggle({
-                Name = "Farm " .. displayName,
-                Description = "Activar para farmear este tipo de jefe",
-                Default = true
-            }, function(state)
-                BossTab.Data.SelectedBosses[modelName] = state
-            end)
-        end 
-
-        local configSuccess, bossConfig = pcall(function() 	
-            return require(ReplicatedStorage:WaitForChild("shared"):WaitForChild("config"):WaitForChild("BossEventConfig")) 
-        end) 
-
-        if configSuccess and bossConfig and bossConfig.RARITIES then 	
-            for _, rarity in ipairs(bossConfig.RARITIES) do 		
-                BossTab.addBossChoice(rarity.BossModel, rarity.DisplayName or rarity.Name or rarity.BossModel) 	
-            end 
-        else 	
-            BossTab.addBossChoice("CommonBoss", "Common")
-            BossTab.addBossChoice("RareBoss", "Rare")
-            BossTab.addBossChoice("EpicBoss", "Epic")
-            BossTab.addBossChoice("LegendaryBoss", "Legendary")
-            BossTab.addBossChoice("MythicBoss", "Mythic")
-            BossTab.addBossChoice("RainbowBoss", "Rainbow")
-        end 
-
-        BossTab.shouldFarmBoss = function(model) 	
-            if not BossTab.Data.Bosses[model.Name] then 		
-                BossTab.addBossChoice(model.Name, Workspace:GetAttribute("BossDisplayName") or model.Name) 	
-            end 	
-            return BossTab.Data.SelectedBosses[model.Name] == true 
-        end 
-
-        BossTab.findActiveBoss = function(model, stats, health, maxHealth, hitbox) 	
-            for _, candidate in ipairs(game:GetService("CollectionService"):GetTagged("BossEventBoss")) do 		
-                if candidate:IsA("Model") and candidate:IsDescendantOf(Workspace) then 			
-                    model = candidate 			
-                    break 		
-                end 	
-            end 	
-            if not model then 		
-                local events = Workspace:FindFirstChild("Events") 		
-                local bossFolder = events and (events:FindFirstChild("BossEvent") or events:FindFirstChild("BossArena")) 		
-                if bossFolder then 			
-                    for _, candidate in ipairs(bossFolder:GetDescendants()) do 				
-                        if candidate:IsA("Model") and (candidate:FindFirstChild("BossDamageHitbox") or candidate:HasTag("BossEventBoss")) then 					
-                            model = candidate 					
-                            break 				
-                        end 			
-                    end 		
-                end 	
-            end 	
-            if not model then return end 	
-            stats = model:FindFirstChild("stats") 	
-            health = stats and stats:FindFirstChild("Health") 	
-            maxHealth = stats and stats:FindFirstChild("MaxHealth") 	
-            hitbox = model:FindFirstChild("BossDamageHitbox", true) 	
-            if not hitbox or not hitbox:IsA("BasePart") then return end 	
-            local currentHealth = health and health.Value or Workspace:GetAttribute("BossHealth") 	
-            if typeof(currentHealth) == "number" and currentHealth <= 0 then return end 	
-            return model, health, maxHealth, hitbox 
-        end 
-
-        BossTab.getBossDisplayName = function(model) 	
-            return Workspace:GetAttribute("BossDisplayName") or model.Name 
-        end 
-
-        BossTab.getBossHealth = function(health) 	
-            return health and health.Value or Workspace:GetAttribute("BossHealth") or 0 
-        end 
-
-        BossTab.getBossMaxHealth = function(maxHealth) 	
-            return maxHealth and maxHealth.Value or Workspace:GetAttribute("BossMaxHealth") or 0 
-        end 
-
-        BossTab.getBossHeadPosition = function(model, hitbox, head) 	
-            head = model:FindFirstChild("Head", true) or model:FindFirstChild("head", true) 	
-            if head and head:IsA("BasePart") then return head.Position end 	
-            if head and head:IsA("Bone") then return head.WorldPosition end 	
-            return hitbox.Position + Vector3.new(0, hitbox.Size.Y * 0.35, 0) 
-        end 
-
-        BossTab.attack = function(boss, model, health, maxHealth, hitbox, character, root, humanoid, punch, leftHand, rightHand, headPos) 	
-            character = LP.Character 	
-            root = character and character:FindFirstChild("HumanoidRootPart") 	
-            humanoid = character and character:FindFirstChildOfClass("Humanoid") 	
-            if not root or not humanoid or humanoid.Health <= 0 then return end 	
-            
-            local backpack = LP:FindFirstChild("Backpack")
-            punch = character:FindFirstChild("Punch") or backpack and backpack:FindFirstChild("Punch")
-            if punch and punch.Parent == backpack then
-                humanoid:EquipTool(punch)
-            end
-            
-            headPos = BossTab.getBossHeadPosition(model, hitbox)
-            -- Altura configurada a 65 studs sobre la cabeza
-            local targetPos = headPos + Vector3.new(0, 65, 0)
-            root.CFrame = CFrame.lookAt(targetPos, headPos)
-            root.AssemblyLinearVelocity = Vector3.zero 	
-            root.AssemblyAngularVelocity = Vector3.zero 	
-            
-            leftHand = character:FindFirstChild("LeftHand") 	
-            rightHand = character:FindFirstChild("RightHand") 	
-            
-            pcall(function() 		
-                if rightHand and leftHand and hitbox then 			
-                    firetouchinterest(hitbox, rightHand, 0) 			
-                    firetouchinterest(hitbox, rightHand, 1) 			
-                    firetouchinterest(hitbox, leftHand, 0) 			
-                    firetouchinterest(hitbox, leftHand, 1) 		
-                end 	
-            end) 	
-                    
-            if os.clock() - boss.Data.LastPunch >= boss.Data.PunchInterval then 		
-                boss.Data.LastPunch = os.clock() 		
-                pcall(function() 			
-                    if LP:FindFirstChild("muscleEvent") then
-                        LP.muscleEvent:FireServer("punch", "leftHand") 			
-                        LP.muscleEvent:FireServer("punch", "rightHand") 			
-                    end
-                    if punch and punch.Parent == character then 
-                        punch:Activate() 
-                    end 		
-                end) 	
-            end 	
-                    
-            boss.BossLabel.Text = "Boss: " .. boss.getBossDisplayName(model) 	
-            boss.HealthLabel.Text = "Health: " .. formatCurrentStat(BossTab.getBossHealth(health)) .. " / " .. formatCurrentStat(BossTab.getBossMaxHealth(maxHealth)) 
-        end 
-
-        BossTab.AutoFarmSwitch = BossTab:AddSwitch("Auto Farm Boss", function(state) 	
-            BossTab.Data.Running = state 	
-            BossTab.Data.Generation = BossTab.Data.Generation + 1 	
-            if not state then 		
-                BossTab.Data.Phase = "Waiting" 		
-                BossTab.StatusLabel.Text = "Status: Disabled" 		
-                return 	end 	
-            task.spawn(function(generation, model, health, maxHealth, hitbox, selected) 		
-                while BossTab.Data.Running and BossTab.Data.Generation == generation do 			
-                    pcall(function() 				
-                        model, health, maxHealth, hitbox = BossTab.findActiveBoss() 				
-                        selected = model and BossTab.shouldFarmBoss(model) 				
-                        if model and not selected then 					
-                            BossTab.Data.Phase = "Waiting" 					
-                            BossTab.StatusLabel.Text = "Status: Skipping " .. (Workspace:GetAttribute("BossDisplayName") or model.Name) 				
-                        elseif model then 					
-                            BossTab.Data.Phase = "Fighting" 					
-                            if LP.Character and LP.Character:FindFirstChildOfClass("Humanoid") and LP.Character:FindFirstChildOfClass("Humanoid").Health > 0 then 						
-                                BossTab.StatusLabel.Text = "Status: Fighting" 						
-                                BossTab.attack(BossTab, model, health, maxHealth, hitbox) 					
-                            else 						
-                                BossTab.StatusLabel.Text = "Status: Waiting for Respawn" 					end 				
-                        else 					
-                            BossTab.Data.Phase = "Waiting" 					
-                            BossTab.StatusLabel.Text = "Status: Waiting for Boss" 				
-                        end 			
-                    end) 			
-                    task.wait(model and selected and 0.01 or 0.4) 		
-                end 	
-            end, BossTab.Data.Generation) 
-        end)
-
-        -- ==================== ZONAS DEL MAPA (TELEPORT) ====================
-        TeleportTab:AddSection("Zonas del Mapa")
-        local function tpTo(cf, name)
-            pcall(function()
-                local character = LP.Character or LP.CharacterAdded:Wait()
-                local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-                humanoidRootPart.CFrame = cf
-                StarterGui:SetCore("SendNotification", {
-                    Title = "Teletransporte",
-                    Text = "Teleported to " .. name,
-                    Duration = 3
-                })
-            end)
-        end
-
-        TeleportTab:AddButton("Spawn", function() tpTo(CFrame.new(2, 8, 115), "Spawn") end)
-        TeleportTab:AddButton("Secret Area", function() tpTo(CFrame.new(1947, 2, 6191), "Secret Area") end)
-        TeleportTab:AddButton("Tiny Island", function() tpTo(CFrame.new(-34, 7, 1903), "Tiny Island") end)
-        TeleportTab:AddButton("Frozen Island", function() tpTo(CFrame.new(-2600.00244, 3.67686558, -403.884369, 0.0873617008, 1.0482899e-09, 0.99617666, 3.07204253e-08, 1, -3.7464023e-09, -0.99617666, 3.09302628e-08, 0.0873617008), "Frozen Island") end)
-        TeleportTab:AddButton("Mythical Island", function() tpTo(CFrame.new(2255, 7, 1071), "Mythical Island") end)
-        TeleportTab:AddButton("Eternal Island", function() tpTo(CFrame.new(-6768, 7, -1287), "Eternal Island") end)
-        TeleportTab:AddButton("Legend Island", function() tpTo(CFrame.new(4604, 991, -3887), "Legend Island") end)
-        TeleportTab:AddButton("Muscle King Island", function() tpTo(CGrade and CGrade.new() or CFrame.new(-8748, 123, -5865), "Muscle King") end)
-        TeleportTab:AddButton("Jungle Island", function() tpTo(CFrame.new(-8659, 6, 2384), "Jungle Island") end)
-        TeleportTab:AddButton("Industrial Gym", function() tpTo(CFrame.new(-5563.23388671875, 60.47392654418945, 4942.44482421875), "Industrial Gym") end)
-        TeleportTab:AddButton("Halloween Gym", function() tpTo(CFrame.new(5558, 86, 5838), "Halloween Gym") end)
-
-        -- ==================== CONFIGURACIÓN ====================
-        SettingsTab:AddSection("Protección y Anti-Cheat")
-        SettingsTab:CreateToggle({
-            Name = "Anti-Cheat / Kick Protection",
-            Description = "Evita que el juego te expulse mediante la función Kick",
-            Default = AntiCheatActive
-        }, function(state)
-            AntiCheatActive = state
-            SaveConfig()
-            pcall(function()
-                StarterGui:SetCore("SendNotification", {
-                    Title = "ERDN Public",
-                    Text = state and "Anti-Cheat Activado 🛡️" or "Anti-Cheat Desactivado ❌",
-                    Duration = 3
-                })
-            end)
-        end)
-
-        SettingsTab:AddSection("Auto Execute")
-        SettingsTab:CreateToggle({
-            Name = "Auto Execute",
-            Description = "Guarda el estado del script para autoejecutarse al ingresar",
-            Default = AutoExecuteActive
-        }, function(state)
-            AutoExecuteActive = state
-            SaveConfig()
-            pcall(function()
-                StarterGui:SetCore("SendNotification", {
-                    Title = "ERDN Public",
-                    Text = state and "Auto Execute Activado ⚙️" or "Auto Execute Desactivado ❌",
-                    Duration = 3
-                })
-            end)
-        end)
-
-        SettingsTab:AddSection("Auto Rejoin")
-        SettingsTab:CreateToggle({
-            Name = "Auto Rejoin",
-            Description = "Reconecta automáticamente al servidor si sufres una desconexión",
-            Default = AutoRejoinActive
-        }, function(state)
-            AutoRejoinActive = state
-            SaveConfig()
-            pcall(function()
-                StarterGui:SetCore("SendNotification", {
-                    Title = "ERDN Public",
-                    Text = state and "Auto Rejoin Activado 🔄" or "Auto Rejoin Desactivado ❌",
-                    Duration = 3
-                })
-            end)
-        end)
-
+        InitMainScript()
     else
         StatusLabel.TextColor3 = Color3.fromRGB(255, 90, 90)
         StatusLabel.Text = "Key Incorrecta. Inténtalo de nuevo ❌"
