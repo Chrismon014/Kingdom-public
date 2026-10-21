@@ -1,0 +1,2237 @@
+-- ==================== SERVICIOS Y VARIABLES ====================
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualUser = game:GetService("VirtualUser")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
+local StarterGui = game:GetService("StarterGui")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+local Workspace = game:GetService("Workspace")
+
+local LP = Players.LocalPlayer
+
+local services = {
+    replicatedstorage = ReplicatedStorage,
+    virtualinputmanager = game:GetService("VirtualInputManager"),
+    collectionservice = game:GetService("CollectionService"),
+    muscleEvent = ReplicatedStorage:WaitForChild("rEvents", 10),
+    isSolara = false,
+    touchParts = function(part1, part2, state)
+        if state == 0 then
+            firetouchinterest(part1, part2, 0)
+        else
+            firetouchinterest(part1, part2, 1)
+        end
+    end
+}
+
+local lp = { player = LP }
+local runtime = {
+    Alive = true,
+    Spawn = function(self, func, ...)
+        return task.spawn(func, ...)
+    end,
+    Connect = function(self, signal, func)
+        return signal:Connect(func)
+    end,
+    Defer = function(self, func, ...)
+        return task.defer(func, ...)
+    end
+}
+
+-- Anti-AFK Automático
+LP.Idled:Connect(function()
+	VirtualUser:CaptureController()
+	VirtualUser:ClickButton2(Vector2.new())
+end)
+
+pcall(function()
+    StarterGui:SetCore("SendNotification", {
+        Title = "ERDN Public",
+        Text = "Anti-AFK Activo 🛡️",
+        Duration = 4
+    })
+end)
+
+repeat task.wait(0.3) until LP:FindFirstChild("muscleEvent") and LP:FindFirstChild("leaderstats")
+
+local Strength = LP.leaderstats:WaitForChild("Strength")
+local Rebirths = LP.leaderstats:WaitForChild("Rebirths")
+
+-- Modos de Farming
+local FastFarm800 = false
+local FastFarm1k5k = false
+
+local AutoRebirth = false
+local RebirthsCombination = false
+local RebirthChaos = false
+local RebirthsTitans = false
+
+local AutoTPMuscleFarming = false
+local AutoTPMuscleRebirth = false
+local MuscleKingCF = CFrame.new(-8714, 17.5, -5723)
+
+local AutoRejoinActive = true
+local AutoExecuteActive = true
+local RedactNameActive = false
+local AntiCheatActive = true
+local ConfigFileName = "ERDNPublic_Config.json"
+
+local function SaveConfig()
+    if type(writefile) == "function" then
+        pcall(function()
+            local configData = {
+                AutoExecute = AutoExecuteActive,
+                AutoRejoin = AutoRejoinActive,
+                RedactName = RedactNameActive,
+                AntiCheat = AntiCheatActive
+            }
+            writefile(ConfigFileName, HttpService:JSONEncode(configData))
+        end)
+    end
+end
+
+local function LoadConfig()
+    if type(readfile) == "function" and type(isfile) == "function" then
+        pcall(function()
+            if isfile(ConfigFileName) then
+                local savedData = HttpService:JSONEncode(readfile(ConfigFileName))
+                if type(savedData) == "table" then
+                    AutoExecuteActive = savedData.AutoExecute == true
+                    AutoRejoinActive = savedData.AutoRejoin == true
+                    RedactNameActive = savedData.RedactName == true
+                    AntiCheatActive = savedData.AntiCheat == true
+                end
+            end
+        end)
+    end
+end
+
+LoadConfig()
+
+local nameVisibilityState = {Character = nil, Connections = {}, Guis = {}, Watches = {}}
+local function clearNameVisibility()
+    local state = nameVisibilityState
+    for _, connection in ipairs(state.Connections) do connection:Disconnect() end
+    table.clear(state.Connections)
+    for gui, connection in pairs(state.Watches) do connection:Disconnect() state.Watches[gui] = nil end
+    for gui, wasEnabled in pairs(state.Guis) do if gui.Parent then gui.Enabled = wasEnabled end end
+    table.clear(state.Guis)
+    state.Character = nil
+end
+
+local function applyNameVisibility()
+    local state = nameVisibilityState
+    local character = LP.Character
+    if state.Character ~= character then
+        clearNameVisibility()
+        state.Character = character
+        if character then
+            local function watchNameGui(gui)
+                if not gui:IsA("BillboardGui") or gui.Name ~= "nameGui" or state.Guis[gui] ~= nil then return end
+                state.Guis[gui] = gui.Enabled
+                state.Watches[gui] = gui:GetPropertyChangedSignal("Enabled"):Connect(function()
+                    if RedactNameActive and gui.Enabled then gui.Enabled = false end
+                end)
+                if RedactNameActive then gui.Enabled = false end
+            end
+            table.insert(state.Connections, character.DescendantAdded:Connect(watchNameGui))
+            table.insert(state.Connections, character.DescendantRemoving:Connect(function(gui)
+                if state.Guis[gui] ~= nil then
+                    local connection = state.Watches[gui]
+                    if connection then connection:Disconnect() end
+                    state.Watches[gui] = nil
+                    gui.Enabled = state.Guis[gui]
+                    state.Guis[gui] = nil
+                end
+            end))
+            for _, gui in ipairs(character:GetDescendants()) do watchNameGui(gui) end
+        end
+    end
+    for gui, wasEnabled in pairs(state.Guis) do
+        if gui.Parent then gui.Enabled = not RedactNameActive and wasEnabled end
+    end
+end
+
+LP.CharacterAdded:Connect(function()
+    applyNameVisibility()
+end)
+
+-- Sistema Anti-Cheat / Kick Protection
+local oldNamecall
+oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+    local method = getnamecallmethod()
+    if AntiCheatActive and method == "Kick" and self == LP then
+        return
+    end
+    return oldNamecall(self, ...)
+end)
+
+CoreGui.RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(child)
+    if AutoRejoinActive and (child.Name == "ErrorPrompt" or child:FindFirstChild("ErrorTitle")) then
+        pcall(function()
+            StarterGui:SetCore("SendNotification", {
+                Title = "ERDN Public",
+                Text = "Reconectando al servidor... 🔄",
+                Duration = 5
+            })
+        end)
+        task.wait(1)
+        TeleportService:Teleport(game.PlaceId, LP)
+    end
+end)
+
+local PETS = {
+    ["Omega Overlord"] = { repSpeed = 20, strength = 0, durability = 0, rebirth = 0 },
+    ["Swift Samurai"] = { repSpeed = 15, strength = 0, durability = 0, rebirth = 0 },
+    ["Powercore Hound"] = { repSpeed = 0, strength = 25, durability = 15, rebirth = 0 },
+    ["Titanium Hydra"] = { repSpeed = 0, strength = 0, durability = 0, rebirth = 2 },
+    ["Tribal Overlord"] = { repSpeed = 0, strength = 0, durability = 0, rebirth = 2 },
+    ["Inferno Unicorn"] = { repSpeed = 0, strength = 25, durability = 25, rebirth = 0 },
+    ["Common Boss Pet"] = { repSpeed = 5, strength = 0, durability = 0, rebirth = 0 },
+    ["Rare Boss Pet"] = { repSpeed = 7, strength = 0, durability = 0, rebirth = 0 },
+    ["Epic Boss Pet"] = { repSpeed = 10, strength = 0, durability = 0, rebirth = 0 },
+    ["Rainbow Boss Pet"] = { repSpeed = 10, strength = 7, durability = 0, rebirth = 0 },
+    ["Legendary Boss Pet"] = { repSpeed = 10, strength = 10, durability = 0, rebirth = 0 },
+    ["Mythic Boss Pet"] = { repSpeed = 10, strength = 20, durability = 0, rebirth = 0 },
+    ["Inferno Drake"] = { repSpeed = 40, strength = 0, durability = 0, rebirth = 0 },
+}
+
+local MAX_PET_SLOTS = 12
+local TARGET_REP_SPEED = 100
+
+local function applyPetLoadout(selected, isCurrent)
+    local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
+    local remote = rEvents and rEvents:FindFirstChild("equipPetEvent")
+    if not remote then return false end
+
+    local petsFolder = LP:FindFirstChild("petsFolder")
+    if petsFolder then
+        for _, folder in ipairs(petsFolder:GetChildren()) do
+            if folder:IsA("Folder") then
+                for _, pet in ipairs(folder:GetChildren()) do
+                    if isCurrent and not isCurrent() then return false end
+                    remote:FireServer("unequipPet", pet)
+                end
+            end
+        end
+    end
+    task.wait(0.05)
+    for _, pet in ipairs(selected) do
+        if isCurrent and not isCurrent() then return false end
+        remote:FireServer("equipPet", pet)
+    end
+    return not isCurrent or isCurrent()
+end
+
+local function sendTrainingReps(state, rate, maxBurst, canSend)
+    local now = os.clock()
+    local elapsed = math.clamp(now - (state.LastAt or now), 0, 0.1)
+    state.LastAt = now
+    state.Tokens = math.min(maxBurst, (state.Tokens or 0) + rate * elapsed)
+    local sent = 0
+    local muscleEvent = LP:FindFirstChild("muscleEvent")
+    while state.Tokens >= 1 and canSend() and muscleEvent do
+        muscleEvent:FireServer("rep")
+        state.Tokens = state.Tokens - 1
+        sent = sent + 1
+    end
+    return sent
+end
+
+local function createFarmLoop(getState, rate, burst)
+    task.spawn(function()
+        local cachedEvent = LP:FindFirstChild("muscleEvent")
+        LP.ChildAdded:Connect(function(child)
+            if child.Name == "muscleEvent" then cachedEvent = child end
+        end)
+
+        local INTERVAL = burst / rate
+
+        while true do
+            if getState() then
+                if not cachedEvent or not cachedEvent.Parent then
+                    cachedEvent = LP:FindFirstChild("muscleEvent")
+                end
+                if cachedEvent then
+                    local start = os.clock()
+                    for i = 1, burst do
+                        if not getState() then break end
+                        pcall(function() cachedEvent:FireServer("rep") end)
+                    end
+                    local remaining = INTERVAL - (os.clock() - start)
+                    if remaining > 0 then task.wait(remaining) else task.wait(0.02) end
+                else
+                    task.wait(0.05)
+                end
+            else
+                task.wait(0.15)
+            end
+        end
+    end)
+end
+
+createFarmLoop(function() return FastFarm800 end, 800, 60)
+createFarmLoop(function() return FastFarm1k5k end, 1200, 100)
+
+task.spawn(function()
+    while true do
+        if AutoTPMuscleFarming or AutoTPMuscleRebirth then
+            pcall(function()
+                local char = LP.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    local root = char.HumanoidRootPart
+                    root.CFrame = MuscleKingCF
+                    root.AssemblyLinearVelocity = Vector3.zero
+                    root.AssemblyAngularVelocity = Vector3.zero
+                end
+            end)
+            task.wait(0.2)
+        else
+            task.wait(0.4)
+        end
+    end
+end)
+
+local Library = {}
+
+local function Create(className, properties, parent)
+    local instance = Instance.new(className)
+    for property, value in pairs(properties) do
+        instance[property] = value
+    end
+    if parent then
+        instance.Parent = parent
+    end
+    return instance
+end
+
+local function MakeDraggable(dragBar, object)
+    local dragging, dragStart, startPos
+    
+    dragBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = object.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then dragging = false end
+            end)
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if not dragging then return end
+        if input.UserInputType ~= Enum.UserInputType.MouseMovement and input.UserInputType ~= Enum.UserInputType.Touch then return end
+        local delta = input.Position - dragStart
+        object.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end)
+end
+
+function Library:CreateWindow(config)
+    local WindowObj = {}
+    local windowTitle = config.Title or "👑 ERDN Public"
+    
+    local parentUI = (gethui and gethui()) or CoreGui or LP:WaitForChild("PlayerGui")
+    if parentUI:FindFirstChild("ERDN_PublicUI") then
+        parentUI.ERDN_PublicUI:Destroy()
+    end
+
+    local ScreenGui = Create("ScreenGui", {
+        Name = "ERDN_PublicUI",
+        ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+        IgnoreGuiInset = true
+    }, parentUI)
+
+    local MainFrame = Create("Frame", {
+        Name = "MainFrame",
+        BackgroundColor3 = Color3.fromRGB(18, 18, 22),
+        BackgroundTransparency = 0.25,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Size = UDim2.new(0, 580, 0, 360),
+        AnchorPoint = Vector2.new(0.5, 0.5)
+    }, ScreenGui)
+
+    Create("UICorner", {CornerRadius = UDim.new(0, 12)}, MainFrame)
+    Create("UIStroke", {Color = Color3.fromRGB(120, 80, 255), Thickness = 1.5, Transparency = 0.2}, MainFrame)
+
+    local MiniButton = Create("TextButton", {
+        Name = "ERDN_Mini",
+        Size = UDim2.new(0, 140, 0, 38),
+        Position = UDim2.new(1, -155, 0, 15),
+        BackgroundColor3 = Color3.fromRGB(22, 22, 30),
+        BackgroundTransparency = 0.25,
+        BorderSizePixel = 0,
+        Text = windowTitle,
+        TextColor3 = Color3.fromRGB(235, 235, 255),
+        Font = Enum.Font.GothamBold,
+        TextSize = 12,
+        Visible = false,
+        AutoButtonColor = false
+    }, ScreenGui)
+
+    Create("UICorner", {CornerRadius = UDim.new(0, 10)}, MiniButton)
+    Create("UIStroke", {Color = Color3.fromRGB(120, 80, 255), Thickness = 1.5}, MiniButton)
+
+    local TopBar = Create("Frame", {
+        Name = "TopBar",
+        BackgroundColor3 = Color3.fromRGB(12, 12, 16),
+        BackgroundTransparency = 0.35,
+        BorderSizePixel = 0,
+        Size = UDim2.new(1, 0, 0, 32)
+    }, MainFrame)
+
+    Create("UICorner", {CornerRadius = UDim.new(0, 12)}, TopBar)
+    Create("Frame", {
+        BackgroundColor3 = Color3.fromRGB(12, 12, 16),
+        BackgroundTransparency = 0.35,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 0, 1, -5),
+        Size = UDim2.new(1, 0, 0, 5)
+    }, TopBar)
+
+    MakeDraggable(TopBar, MainFrame)
+
+    local CloseBtn = Create("TextButton", {
+        Size = UDim2.new(0, 24, 0, 24),
+        Position = UDim2.new(1, -30, 0, 4),
+        BackgroundColor3 = Color3.fromRGB(30, 30, 38),
+        BackgroundTransparency = 0.35,
+        Text = "×",
+        TextColor3 = Color3.fromRGB(180, 180, 200),
+        Font = Enum.Font.GothamBold,
+        TextSize = 16
+    }, TopBar)
+    Create("UICorner", {CornerRadius = UDim.new(0, 6)}, CloseBtn)
+    CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+
+    local MinimizeBtn = Create("TextButton", {
+        Size = UDim2.new(0, 24, 0, 24),
+        Position = UDim2.new(1, -60, 0, 4),
+        BackgroundColor3 = Color3.fromRGB(30, 30, 38),
+        BackgroundTransparency = 0.35,
+        Text = "-",
+        TextColor3 = Color3.fromRGB(210, 210, 225),
+        Font = Enum.Font.GothamBold,
+        TextSize = 16
+    }, TopBar)
+    Create("UICorner", {CornerRadius = UDim.new(0, 6)}, MinimizeBtn)
+
+    MinimizeBtn.MouseButton1Click:Connect(function()
+        MainFrame.Visible = false
+        MiniButton.Visible = true
+    end)
+
+    MiniButton.MouseButton1Click:Connect(function()
+        MiniButton.Visible = false
+        MainFrame.Visible = true
+    end)
+
+    local Container = Create("Frame", {
+        Name = "Container",
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 0, 0, 32),
+        Size = UDim2.new(1, 0, 1, -32)
+    }, MainFrame)
+
+    local Sidebar = Create("Frame", {
+        Name = "Sidebar",
+        BackgroundColor3 = Color3.fromRGB(12, 12, 16),
+        BackgroundTransparency = 0.35,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 0, 0, 0),
+        Size = UDim2.new(0, 140, 1, 0)
+    }, Container)
+    Create("UICorner", {CornerRadius = UDim.new(0, 12)}, Sidebar)
+
+    local AvatarImage = Create("ImageLabel", {
+        Name = "AvatarImage",
+        BackgroundColor3 = Color3.fromRGB(25, 24, 32),
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 12, 0, 12),
+        Size = UDim2.new(0, 36, 0, 36),
+        Image = Players:GetUserThumbnailAsync(LP.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
+    }, Sidebar)
+    Create("UICorner", {CornerRadius = UDim.new(1, 0)}, AvatarImage)
+
+    Create("Frame", {
+        BackgroundColor3 = Color3.fromRGB(28, 28, 36),
+        BackgroundTransparency = 0.5,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 12, 0, 56),
+        Size = UDim2.new(1, -24, 0, 1)
+    }, Sidebar)
+
+    local NavContainer = Create("ScrollingFrame", {
+        Name = "NavContainer",
+        Size = UDim2.new(1, -6, 1, -64),
+        Position = UDim2.new(0, 3, 0, 62),
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        ScrollBarThickness = 3,
+        ScrollBarImageColor3 = Color3.fromRGB(120, 80, 255),
+        CanvasSize = UDim2.new(0, 0, 0, 0)
+    }, Sidebar)
+
+    local navLayout = Create("UIListLayout", {
+        Padding = UDim.new(0, 5),
+        SortOrder = Enum.SortOrder.LayoutOrder
+    }, NavContainer)
+
+    navLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        NavContainer.CanvasSize = UDim2.new(0, 0, 0, navLayout.AbsoluteContentSize.Y + 10)
+    end)
+
+    local ContentContainer = Create("Frame", {
+        Name = "ContentContainer",
+        Size = UDim2.new(1, -145, 1, 0),
+        Position = UDim2.new(0, 145, 0, 0),
+        BackgroundTransparency = 1
+    }, Container)
+
+    local pages = {}
+    local navButtons = {}
+    local firstTab = true
+
+    local emojiMap = {
+        ["Principal"] = "🏠",
+        ["Farming"] = "🏋️",
+        ["Rebirth"] = "🌌",
+        ["Auto Rocks"] = "⛰️",
+        ["Auto Gym"] = "🏋️‍♂️",
+        ["Stats"] = "📊",
+        ["Gift"] = "🎁",
+        ["Boss"] = "👹",
+        ["Teleport"] = "🌀",
+        ["Settings"] = "⚙️"
+    }
+
+    function WindowObj:CreateTab(name, iconChar, subTitleText)
+        local finalIcon = iconChar or emojiMap[name] or name:sub(1, 1)
+
+        local btn = Create("TextButton", {
+            Name = name .. "TabBtn",
+            Size = UDim2.new(1, -6, 0, 32),
+            BackgroundColor3 = Color3.fromRGB(12, 12, 16),
+            BackgroundTransparency = 0.5,
+            BorderSizePixel = 0,
+            Text = "",
+            AutoButtonColor = false
+        }, NavContainer)
+        Create("UICorner", {CornerRadius = UDim.new(0, 8)}, btn)
+
+        local iconLabel = Create("TextLabel", {
+            Name = "IconLabel",
+            Size = UDim2.new(0, 20, 1, 0),
+            Position = UDim2.new(0, 8, 0, 0),
+            BackgroundTransparency = 1,
+            Text = finalIcon,
+            TextColor3 = Color3.fromRGB(160, 160, 180),
+            Font = Enum.Font.GothamBold,
+            TextSize = 11
+        }, btn)
+
+        local textLabel = Create("TextLabel", {
+            Name = "TextLabel",
+            Size = UDim2.new(1, -32, 1, 0),
+            Position = UDim2.new(0, 28, 0, 0),
+            BackgroundTransparency = 1,
+            Text = name,
+            TextColor3 = Color3.fromRGB(180, 180, 200),
+            Font = Enum.Font.GothamMedium,
+            TextSize = 11,
+            TextXAlignment = Enum.TextXAlignment.Left
+        }, btn)
+
+        local indicator = Create("Frame", {
+            Name = "Indicator",
+            Size = UDim2.new(0, 3, 0, 18),
+            Position = UDim2.new(0, 0, 0.5, -9),
+            BackgroundColor3 = Color3.fromRGB(120, 80, 255),
+            BorderSizePixel = 0,
+            Visible = false
+        }, btn)
+        Create("UICorner", {CornerRadius = UDim.new(0, 2)}, indicator)
+
+        local page = Create("ScrollingFrame", {
+            Name = name .. "Page",
+            Size = UDim2.new(1, -16, 1, -12),
+            Position = UDim2.new(0, 8, 0, 6),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            ScrollBarThickness = 3,
+            ScrollBarImageColor3 = Color3.fromRGB(120, 80, 255),
+            CanvasSize = UDim2.new(0, 0, 0, 0),
+            Visible = false
+        }, ContentContainer)
+
+        local pageLayout = Create("UIListLayout", {
+            Padding = UDim.new(0, 8),
+            SortOrder = Enum.SortOrder.LayoutOrder
+        }, page)
+
+        pageLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            page.CanvasSize = UDim2.new(0, 0, 0, pageLayout.AbsoluteContentSize.Y + 15)
+        end)
+
+        Create("TextLabel", {
+            Size = UDim2.new(1, 0, 0, 22),
+            BackgroundTransparency = 1,
+            Text = finalIcon .. "  " .. name,
+            TextColor3 = Color3.fromRGB(255, 255, 255),
+            Font = Enum.Font.GothamBold,
+            TextSize = 18,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            LayoutOrder = -2
+        }, page)
+
+        if subTitleText then
+            Create("TextLabel", {
+                Size = UDim2.new(1, 0, 0, 16),
+                BackgroundTransparency = 1,
+                Text = subTitleText,
+                TextColor3 = Color3.fromRGB(140, 140, 160),
+                Font = Enum.Font.Gotham,
+                TextSize = 11,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                LayoutOrder = -1
+            }, page)
+        end
+
+        table.insert(navButtons, {
+            Button = btn,
+            Indicator = indicator,
+            Icon = iconLabel,
+            Text = textLabel
+        })
+
+        if firstTab then
+            firstTab = false
+            page.Visible = true
+            btn.BackgroundColor3 = Color3.fromRGB(28, 24, 45)
+            btn.BackgroundTransparency = 0.25
+            indicator.Visible = true
+            iconLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        end
+
+        btn.MouseButton1Click:Connect(function()
+            for _, p in pairs(pages) do p.Visible = false end
+            page.Visible = true
+
+            for _, navItem in ipairs(navButtons) do
+                navItem.Button.BackgroundColor3 = Color3.fromRGB(12, 12, 16)
+                navItem.Button.BackgroundTransparency = 0.5
+                navItem.Indicator.Visible = false
+                navItem.Icon.TextColor3 = Color3.fromRGB(160, 160, 180)
+                navItem.Text.TextColor3 = Color3.fromRGB(180, 180, 200)
+            end
+
+            btn.BackgroundColor3 = Color3.fromRGB(28, 24, 45)
+            btn.BackgroundTransparency = 0.25
+            indicator.Visible = true
+            iconLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        end)
+
+        pages[name] = page
+
+        local TabMethods = {}
+
+        function TabMethods:AddSection(secText)
+            return Create("TextLabel", {
+                Size = UDim2.new(1, 0, 0, 24),
+                BackgroundTransparency = 1,
+                Text = string.upper(secText),
+                TextColor3 = Color3.fromRGB(150, 120, 230),
+                Font = Enum.Font.GothamBold,
+                TextSize = 12,
+                TextXAlignment = Enum.TextXAlignment.Left
+            }, page)
+        end
+
+        function TabMethods:AddHeading(text)
+            return self:AddSection(text)
+        end
+
+        function TabMethods:AddLabel(text)
+            return Create("TextLabel", {
+                Size = UDim2.new(1, 0, 0, 20),
+                BackgroundTransparency = 1,
+                Text = text,
+                TextColor3 = Color3.fromRGB(210, 210, 225),
+                Font = Enum.Font.GothamMedium,
+                TextSize = 12,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                TextTruncate = Enum.TextTruncate.AtEnd
+            }, page)
+        end
+
+        function TabMethods:AddSwitch(text, callback)
+            return self:CreateToggle({
+                Name = text,
+                Description = "",
+                Default = false
+            }, function(state)
+                callback(state)
+            end)
+        end
+
+        function TabMethods:AddDropdown(text, callback)
+            local dropContainer = Create("Frame", {
+                Size = UDim2.new(1, -6, 0, 36),
+                BackgroundColor3 = Color3.fromRGB(24, 24, 30),
+                BackgroundTransparency = 0.35,
+                BorderSizePixel = 0
+            }, page)
+            Create("UICorner", {CornerRadius = UDim.new(0, 8)}, dropContainer)
+
+            Create("TextLabel", {
+                Size = UDim2.new(1, -12, 1, 0),
+                Position = UDim2.new(0, 10, 0, 0),
+                BackgroundTransparency = 1,
+                Text = text .. " (Click)",
+                TextColor3 = Color3.fromRGB(240, 240, 250),
+                Font = Enum.Font.GothamBold,
+                TextSize = 12,
+                TextXAlignment = Enum.TextXAlignment.Left
+            }, dropContainer)
+
+            local items = {}
+            local dropdownObj = {
+                Add = function(self, itemName)
+                    table.insert(items, itemName)
+                end
+            }
+
+            local btn = Create("TextButton", {
+                Size = UDim2.new(1, 0, 1, 0),
+                BackgroundTransparency = 1,
+                Text = ""
+            }, dropContainer)
+
+            btn.MouseButton1Click:Connect(function()
+                if #items > 0 then
+                    callback(items[1], items[1])
+                end
+            end)
+
+            return dropdownObj
+        end
+
+        function TabMethods:CreateToggle(config, callback)
+            local titleText = config.Name or "Toggle"
+            local descText = config.Description or ""
+            local defaultState = config.Default or false
+            local currentState = defaultState
+
+            local row = Create("Frame", {
+                Size = UDim2.new(1, -6, 0, descText ~= "" and 52 or 40),
+                BackgroundColor3 = Color3.fromRGB(24, 24, 30),
+                BackgroundTransparency = 0.35,
+                BorderSizePixel = 0
+            }, page)
+            Create("UICorner", {CornerRadius = UDim.new(0, 8)}, row)
+
+            Create("TextLabel", {
+                Size = UDim2.new(1, -75, 0, 20),
+                Position = UDim2.new(0, 12, 0, descText ~= "" and 8 or 10),
+                BackgroundTransparency = 1,
+                Text = titleText,
+                TextColor3 = Color3.fromRGB(240, 240, 250),
+                Font = Enum.Font.GothamBold,
+                TextSize = 13,
+                TextXAlignment = Enum.TextXAlignment.Left
+            }, row)
+
+            if descText ~= "" then
+                Create("TextLabel", {
+                    Size = UDim2.new(1, -75, 0, 16),
+                    Position = UDim2.new(0, 12, 0, 28),
+                    BackgroundTransparency = 1,
+                    Text = descText,
+                    TextColor3 = Color3.fromRGB(130, 130, 150),
+                    Font = Enum.Font.Gotham,
+                    TextSize = 10,
+                    TextXAlignment = Enum.TextXAlignment.Left
+                }, row)
+            end
+
+            local switchBg = Create("Frame", {
+                Size = UDim2.new(0, 42, 0, 24),
+                Position = UDim2.new(1, -52, 0.5, -12),
+                BackgroundColor3 = currentState and Color3.fromRGB(100, 70, 220) or Color3.fromRGB(50, 50, 60),
+                BorderSizePixel = 0
+            }, row)
+            Create("UICorner", {CornerRadius = UDim.new(1, 0)}, switchBg)
+
+            local knob = Create("Frame", {
+                Size = UDim2.new(0, 18, 0, 18),
+                Position = currentState and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9),
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                BorderSizePixel = 0
+            }, switchBg)
+            Create("UICorner", {CornerRadius = UDim.new(1, 0)}, knob)
+
+            local clickBtn = Create("TextButton", {
+                Size = UDim2.new(1, 0, 1, 0),
+                BackgroundTransparency = 1,
+                Text = ""
+            }, row)
+
+            clickBtn.MouseButton1Click:Connect(function()
+                currentState = not currentState
+                local tweenInfo = TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                if currentState then
+                    TweenService:Create(switchBg, tweenInfo, {BackgroundColor3 = Color3.fromRGB(100, 70, 220)}):Play()
+                    TweenService:Create(knob, tweenInfo, {Position = UDim2.new(1, -21, 0.5, -9)}):Play()
+                else
+                    TweenService:Create(switchBg, tweenInfo, {BackgroundColor3 = Color3.fromRGB(50, 50, 60)}):Play()
+                    TweenService:Create(knob, tweenInfo, {Position = UDim2.new(0, 3, 0.5, -9)}):Play()
+                end
+                pcall(callback, currentState)
+            end)
+
+            if defaultState then pcall(callback, true) end
+
+            return {
+                Set = function(self, val)
+                    if currentState ~= val then
+                        currentState = val
+                        local tweenInfo = TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                        if currentState then
+                            TweenService:Create(switchBg, tweenInfo, {BackgroundColor3 = Color3.fromRGB(100, 70, 220)}):Play()
+                            TweenService:Create(knob, tweenInfo, {Position = UDim2.new(1, -21, 0.5, -9)}):Play()
+                        else
+                            TweenService:Create(switchBg, tweenInfo, {BackgroundColor3 = Color3.fromRGB(50, 50, 60)}):Play()
+                            TweenService:Create(knob, tweenInfo, {Position = UDim2.new(0, 3, 0.5, -9)}):Play()
+                        end
+                        pcall(callback, currentState)
+                    end
+                end
+            }
+        end
+
+        function TabMethods:AddButton(text, callback)
+            local btn = Create("TextButton", {
+                Size = UDim2.new(1, -6, 0, 36),
+                BackgroundColor3 = Color3.fromRGB(28, 24, 45),
+                BackgroundTransparency = 0.35,
+                BorderSizePixel = 0,
+                Text = text,
+                TextColor3 = Color3.fromRGB(235, 235, 255),
+                Font = Enum.Font.GothamBold,
+                TextSize = 12,
+                AutoButtonColor = true
+            }, page)
+            Create("UICorner", {CornerRadius = UDim.new(0, 8)}, btn)
+
+            btn.MouseButton1Click:Connect(function()
+                pcall(callback)
+            end)
+            return btn
+        end
+
+        function TabMethods:AddTextBox(placeholder, callback)
+            local row = Create("Frame", {
+                Size = UDim2.new(1, -6, 0, 38),
+                BackgroundColor3 = Color3.fromRGB(24, 24, 30),
+                BackgroundTransparency = 0.35,
+                BorderSizePixel = 0
+            }, page)
+            Create("UICorner", {CornerRadius = UDim.new(0, 8)}, row)
+
+            local box = Create("TextBox", {
+                Size = UDim2.new(1, -20, 1, 0),
+                Position = UDim2.new(0, 10, 0, 0),
+                BackgroundTransparency = 1,
+                PlaceholderText = placeholder or "Escribe aquí...",
+                Text = "",
+                TextColor3 = Color3.fromRGB(240, 240, 250),
+                PlaceholderColor3 = Color3.fromRGB(120, 120, 140),
+                Font = Enum.Font.GothamMedium,
+                TextSize = 12,
+                TextXAlignment = Enum.TextXAlignment.Left
+            }, row)
+
+            box.FocusLost:Connect(function(enterPressed)
+                pcall(callback, box.Text)
+            end)
+
+            return box
+        end
+
+        return TabMethods
+    end
+
+    return WindowObj
+end
+
+local Window = Library:CreateWindow({
+    Title = "👑 ERDN Public",
+    Icon = "rbxassetid://6031097225"
+})
+
+local PrincipalTab = Window:CreateTab("Principal", "🏠", "Bienvenido al script")
+local FarmingTab = Window:CreateTab("Farming", "🏋️", "Fast Fuerza")
+local RebirthTab = Window:CreateTab("Rebirth", "🌌", "Fast Renacimientos")
+local RocksTab = Window:CreateTab("Auto Rocks", "⛰️", "Farm Rocks")
+local AutoGymTab = Window:CreateTab("Auto Gym", "🏋️‍♂️", "Gimnasio Automático")
+local StatsTab = Window:CreateTab("Stats", "📊", "Estadisticas")
+local GiftTab = Window:CreateTab("Gift", "🎁", "Regala eggs")
+local BossTab = Window:CreateTab("Boss", "👹", "Sistema de Bosses")
+local TeleportTab = Window:CreateTab("Teleport", "🌀", "TPs")
+local SettingsTab = Window:CreateTab("Settings", "⚙️", "Configuración")
+
+local tabs = {
+    boss = BossTab,
+    rebirths = RebirthTab,
+    strength = { running = false, FastRepToggle = { Set = function(self, val) FastFarm800 = val end } },
+    strength2 = { running = false, FastRepToggle = { Set = function(self, val) FastFarm1k5k = val end } }
+}
+
+local function formatNumber(number)
+    local isNegative = number < 0
+    number = math.abs(number)
+    if number >= 1e18 then return (isNegative and "-" or "") .. string.format("%.2fQi", number / 1e18)
+    elseif number >= 1e15 then return (isNegative and "-" or "") .. string.format("%.2fQa", number / 1e15)
+    elseif number >= 1e12 then return (isNegative and "-" or "") .. string.format("%.2fT", number / 1e12)
+    elseif number >= 1e9 then return (isNegative and "-" or "") .. string.format("%.2fB", number / 1e9)
+    elseif number >= 1e6 then return (isNegative and "-" or "") .. string.format("%.2fM", number / 1e6)
+    elseif number >= 1e3 then return (isNegative and "-" or "") .. string.format("%.2fK", number / 1e3)
+    else return (isNegative and "-" or "") .. string.format("%.0f", number) end
+end
+
+local function formatCurrentStat(val)
+    return tostring(val or 0)
+end
+
+PrincipalTab:AddSection("Utilidades")
+
+PrincipalTab:CreateToggle({
+    Name = "Hide Name",
+    Description = "Oculta el nombre sobre tu personaje en el juego",
+    Default = RedactNameActive
+}, function(state)
+    RedactNameActive = state
+    applyNameVisibility()
+    SaveConfig()
+end)
+
+PrincipalTab:CreateToggle({
+    Name = "Anti-AFK",
+    Description = "Protección automática contra inactividad",
+    Default = true
+}, function(state)
+    if state then
+        pcall(function()
+            StarterGui:SetCore("SendNotification", {
+                Title = "ERDN Public",
+                Text = "Anti-AFK Activo 🛡️",
+                Duration = 3
+            })
+        end)
+    end
+end)
+
+PrincipalTab:CreateToggle({
+    Name = "Anti Lag",
+    Description = "",
+    Default = false
+}, function(state)
+    pcall(function()
+        if state then
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+            Lighting.GlobalShadows = false
+            Lighting.Technology = Enum.LightingTechnology.Compatibility
+            Lighting.Brightness = 2
+            for _, v in pairs(Lighting:GetChildren()) do
+                if v:IsA("PostEffect") then v.Enabled = false end
+            end
+            StarterGui:SetCore("SendNotification", {
+                Title = "ERDN Public",
+                Text = "Anti Lag Activado",
+                Duration = 3
+            })
+        else
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+            Lighting.GlobalShadows = true
+            Lighting.Technology = Enum.LightingTechnology.Future
+        end
+    end)
+end)
+
+PrincipalTab:CreateToggle({
+    Name = "Optimizador Ug",
+    Description = "",
+    Default = false
+}, function(state)
+    pcall(function()
+        if state then
+            for _, obj in pairs(Workspace:GetDescendants()) do
+                if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Fire") or obj:IsA("Smoke") then
+                    obj.Enabled = false
+                elseif obj:IsA("BasePart") then
+                    obj.CastShadow = false
+                end
+            end
+            RunService.StepSimulation = false
+            StarterGui:SetCore("SendNotification", {
+                Title = "ERDN Public",
+                Text = "Modo Nube Activado: Máxima fluidez 🚀",
+                Duration = 4
+            })
+        else
+            StarterGui:SetCore("SendNotification", {
+                Title = "ERDN Public",
+                Text = "Modo Nube Desactivado",
+                Duration = 3
+            })
+        end
+    end)
+end)
+
+FarmingTab:AddSection("Modos de Farming")
+FarmingTab:CreateToggle({
+    Name = "Farm 800 Rep/s",
+    Description = "",
+    Default = false
+}, function(state)
+    FastFarm800 = state
+    if state then 
+        FastFarm1k5k = false 
+    end
+end)
+
+FarmingTab:CreateToggle({
+    Name = "OP Farm 5k Rep/s",
+    Description = "",
+    Default = false
+}, function(state)
+    FastFarm1k5k = state
+    if state then 
+        FastFarm800 = false 
+    end
+end)
+
+-- ==================== PESTAÑA REBIRTH FUNCIONAL ====================
+RebirthTab:AddSection("Rebirth")
+RebirthTab:CreateToggle({
+    Name = "Auto Rebirth",
+    Description = "Rebirths + Strenght",
+    Default = false
+}, function(state)
+    AutoRebirth = state
+    if state then
+        RebirthsCombination = false
+        RebirthChaos = false
+        RebirthsTitans = false
+    end
+end)
+
+RebirthTab:AddSection("Fast Rebirth (Packs)")
+
+local function triggerCombination()
+    pcall(function()
+        local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
+        local remote = rEvents and rEvents:FindFirstChild("rebirthRemote")
+        if remote then
+            if remote:IsA("RemoteFunction") then
+                remote:InvokeServer("rebirthRequest")
+            elseif remote:IsA("RemoteEvent") then
+                remote:FireServer("rebirthRequest")
+            end
+        end
+    end)
+end
+
+-- ==================== SISTEMA DE MASCOTAS Y REBIRTH MEJORADO ====================
+local function getOwnedConfiguredPets()
+    local ownedPets = {}
+    local petsFolder = lp.player:FindFirstChild("petsFolder")
+    if petsFolder then
+        for _, folder in ipairs(petsFolder:GetChildren()) do
+            if folder:IsA("Folder") then
+                for _, pet in ipairs(folder:GetChildren()) do
+                    local config = PETS[pet.Name]
+                    if config then
+                        table.insert(ownedPets, {
+                            instance = pet,
+                            name = pet.Name,
+                            repSpeed = config.repSpeed or 0,
+                            strength = config.strength or 0,
+                            durability = config.durability or 0,
+                            rebirth = config.rebirth or 0,
+                        })
+                    end
+                end
+            end
+        end
+    end
+    return ownedPets
+end
+
+local function equipBestFarmingPets(isCurrent)
+    if isCurrent and not isCurrent() then return end
+    local pets = getOwnedConfiguredPets()
+    local selected = {}
+    local equipped = {}
+    local equippedCount = 0
+
+    if RebirthChaos then
+        for _, pet in ipairs(pets) do
+            if pet.name == "Swift Samurai" and equippedCount < MAX_PET_SLOTS then
+                table.insert(selected, pet.instance)
+                equipped[pet.instance] = true
+                equippedCount = equippedCount + 1
+            end
+        end
+    elseif RebirthsTitans then
+        for _, pet in ipairs(pets) do
+            if pet.name == "Omega Overlord" and equippedCount < MAX_PET_SLOTS then
+                table.insert(selected, pet.instance)
+                equipped[pet.instance] = true
+                equippedCount = equippedCount + 1
+            end
+        end
+    end
+
+    table.sort(pets, function(a, b) return a.repSpeed > b.repSpeed end)
+    for _, pet in ipairs(pets) do
+        if equippedCount >= MAX_PET_SLOTS then break end
+        if not equipped[pet.instance] and pet.repSpeed > 0 then
+            table.insert(selected, pet.instance)
+            equipped[pet.instance] = true
+            equippedCount = equippedCount + 1
+        end
+    end
+
+    applyPetLoadout(selected, isCurrent)
+    return equippedCount
+end
+
+local function equipBestRebirthPets(isCurrent)
+    if isCurrent and not isCurrent() then return end
+    local pets = getOwnedConfiguredPets()
+    local selected = {}
+    local equippedCount = 0
+
+    if RebirthChaos then
+        for _, pet in ipairs(pets) do
+            if pet.name == "Tribal Overlord" and equippedCount < MAX_PET_SLOTS then
+                table.insert(selected, pet.instance)
+                equippedCount = equippedCount + 1
+            end
+        end
+    elseif RebirthsTitans then
+        for _, pet in ipairs(pets) do
+            if pet.name == "Titanium Hydra" and equippedCount < MAX_PET_SLOTS then
+                table.insert(selected, pet.instance)
+                equippedCount = equippedCount + 1
+            end
+        end
+    else
+        table.sort(pets, function(a, b) return a.rebirth > b.rebirth end)
+        for _, pet in ipairs(pets) do
+            if equippedCount >= MAX_PET_SLOTS then break end
+            if pet.rebirth > 0 then
+                table.insert(selected, pet.instance)
+                equippedCount = equippedCount + 1
+            end
+        end
+    end
+
+    applyPetLoadout(selected, isCurrent)
+    return equippedCount
+end
+
+RebirthTab.leaderstats = lp.player:WaitForChild("leaderstats")
+RebirthTab.rebirths = RebirthTab.leaderstats:WaitForChild("Rebirths")
+RebirthTab.strength = RebirthTab.leaderstats:WaitForChild("Strength")
+RebirthTab.running = false
+RebirthTab.workerActive = false
+RebirthTab.startedAt = 0
+RebirthTab.timerStarted = false
+RebirthTab.hasStarted = false
+RebirthTab.baselineReady = false
+RebirthTab.measuredCycles = 0
+RebirthTab.lastConfirmedAt = nil
+RebirthTab.nextRequestAt = 0
+RebirthTab.cooldown = 6
+RebirthTab.totalElapsed = 0
+RebirthTab.statSamples = {Rebirths = RebirthTab.rebirths.Value}
+RebirthTab.statGains = {Rebirths = 0}
+RebirthTab.generation = 0
+RebirthTab.adaptive = { TargetSeconds = 3, MinRate = 3, MaxRate = 50, SendRate = 10, ProbeRate = 10, ProbeReps = 10, FeedbackTimeout = 1, StrengthPerRep = nil, LastTrainingSeconds = nil }
+
+RebirthTab.Status = RebirthTab:AddLabel("Status: Inactive")
+RebirthTab.Runtime = RebirthTab:AddLabel("Runtime: 0d 0h 0m 0s")
+RebirthTab.RebirthStats = RebirthTab:AddLabel("Rebirths: " .. formatCurrentStat(RebirthTab.rebirths.Value) .. " | Gained: 0")
+RebirthTab.AverageRate = RebirthTab:AddLabel("Average: -- / Hour | -- / Day | -- / Week")
+RebirthTab.Status.TextColor3 = Color3.fromRGB(255, 80, 80)
+
+RebirthTab.updateStats = function()
+    RebirthTab.RebirthStats.Text = "Rebirths: " .. formatCurrentStat(RebirthTab.rebirths.Value) .. " | Gained: " .. formatNumber(RebirthTab.statGains.Rebirths)
+end
+
+RebirthTab.updateRuntime = function()
+    local elapsed = RebirthTab.totalElapsed + (RebirthTab.timerStarted and os.clock() - RebirthTab.startedAt or 0)
+    RebirthTab.Runtime.Text = string.format("Runtime: %dd %dh %dm %ds", math.floor(elapsed / 86400), math.floor(elapsed % 86400 / 3600), math.floor(elapsed % 3600 / 60), math.floor(elapsed % 60))
+end
+
+RebirthTab.updateAverage = function()
+    local elapsed = RebirthTab.totalElapsed + (RebirthTab.timerStarted and os.clock() - RebirthTab.startedAt or 0)
+    if elapsed <= 0 then return end
+    local hourly = RebirthTab.statGains.Rebirths / elapsed * 3600
+    RebirthTab.AverageRate.Text = string.format("Average: %s / Hour | %s / Day | %s / Week", formatNumber(hourly), formatNumber(hourly * 24), formatNumber(hourly * 168))
+end
+
+RebirthTab:AddButton("Reset Calcs", function()
+    RebirthTab.totalElapsed = 0
+    RebirthTab.startedAt = os.clock()
+    RebirthTab.statGains.Rebirths = 0
+    RebirthTab.statSamples.Rebirths = RebirthTab.rebirths.Value
+    RebirthTab.updateStats()
+end)
+
+RebirthTab.isCurrent = function(generation)
+    return RebirthTab.running and RebirthTab.generation == generation
+end
+
+RebirthTab.updateAdaptiveSpeed = function(cycle, finalSample)
+    local adaptive = RebirthTab.adaptive
+    local now = os.clock()
+    if not finalSample and now - cycle.SampleAt < 0.25 then return end
+    local strength = RebirthTab.strength.Value
+    local gain = strength - cycle.StartStrength
+    if gain > 0 and cycle.Sent > 0 and (finalSample or strength > cycle.SampleStrength) then
+        adaptive.StrengthPerRep = gain / cycle.Sent
+        cycle.SampleStrength = strength
+    end
+    if adaptive.StrengthPerRep and adaptive.StrengthPerRep > 0 then
+        local reps = math.max(1, math.ceil(math.max(0, cycle.Target - cycle.StartStrength) / adaptive.StrengthPerRep))
+        adaptive.SendRate = math.clamp(reps / adaptive.TargetSeconds, adaptive.MinRate, adaptive.MaxRate)
+    else
+        adaptive.SendRate = adaptive.ProbeRate
+    end
+    cycle.SampleAt = now
+end
+
+RebirthTab.performRebirth = function(generation)
+    local adaptive = RebirthTab.adaptive
+    local cycle = {
+        Target = 5000 + RebirthTab.rebirths.Value * 2550,
+        Rebirths = RebirthTab.rebirths.Value,
+        SampleAt = os.clock(),
+        StartStrength = RebirthTab.strength.Value,
+        SampleStrength = RebirthTab.strength.Value,
+        LastSentAt = os.clock(),
+        Sent = 0,
+        Tokens = 0,
+        LastAt = os.clock(),
+        StatusAt = -math.huge,
+        TrainingSeconds = 0
+    }
+    adaptive.SendRate = adaptive.StrengthPerRep and math.clamp(math.max(0, cycle.Target - cycle.StartStrength) / adaptive.StrengthPerRep / adaptive.TargetSeconds, adaptive.MinRate, adaptive.MaxRate) or adaptive.ProbeRate
+    cycle.RepBudget = adaptive.StrengthPerRep and math.max(adaptive.ProbeReps, math.ceil(math.max(0, cycle.Target - cycle.StartStrength) / adaptive.StrengthPerRep)) or adaptive.ProbeReps
+    
+    local lastTrainingAt = os.clock()
+    local function needsTraining()
+        return RebirthTab.isCurrent(generation) and RebirthTab.rebirths.Value == cycle.Rebirths and RebirthTab.strength.Value < cycle.Target
+    end
+    
+    while needsTraining() do
+        local now = os.clock()
+        local character = lp.player.Character
+        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+        if humanoid and humanoid.Health > 0 then
+            cycle.TrainingSeconds = cycle.TrainingSeconds + math.max(0, now - lastTrainingAt)
+            RebirthTab.updateAdaptiveSpeed(cycle)
+            if cycle.Sent >= cycle.RepBudget then
+                cycle.Tokens = 0
+                cycle.LastAt = now
+                if now - cycle.LastSentAt >= adaptive.FeedbackTimeout then
+                    local missing = math.max(0, cycle.Target - RebirthTab.strength.Value)
+                    local extra = adaptive.StrengthPerRep and math.ceil(missing / adaptive.StrengthPerRep) or adaptive.ProbeReps
+                    cycle.RepBudget = cycle.Sent + math.clamp(extra, math.ceil(adaptive.ProbeReps / 2), adaptive.ProbeReps)
+                end
+            else
+                local budget = cycle.RepBudget - cycle.Sent
+                local sent = sendTrainingReps(cycle, adaptive.SendRate, 5, function()
+                    if budget <= 0 or not needsTraining() then return false end
+                    budget = budget - 1
+                    return true
+                end)
+                cycle.Sent = cycle.Sent + sent
+                if sent > 0 then cycle.LastSentAt = now end
+            end
+            if now - cycle.StatusAt >= 0.25 then
+                RebirthTab.Status.Text = (cycle.Sent >= cycle.RepBudget and "Status: Waiting for Strength Update | " or "Status: Strength Training | ") .. string.format("%.1fs", cycle.TrainingSeconds) .. " | " .. formatNumber(adaptive.SendRate) .. " reps/s"
+                cycle.StatusAt = now
+            end
+        else
+            cycle.Tokens = 0
+            cycle.LastAt = now
+            RebirthTab.Status.Text = "Status: Waiting for Respawn"
+        end
+        lastTrainingAt = now
+        RunService.Heartbeat:Wait()
+    end
+    
+    if not RebirthTab.isCurrent(generation) or RebirthTab.rebirths.Value ~= cycle.Rebirths then return end
+    RebirthTab.updateAdaptiveSpeed(cycle, true)
+    adaptive.LastTrainingSeconds = cycle.TrainingSeconds
+    RebirthTab.Status.Text = "Status: Switching to Rebirth Pets"
+    
+    equipBestRebirthPets(function() return RebirthTab.isCurrent(generation) end)
+    task.wait(0.25)
+    
+    while RebirthTab.isCurrent(generation) and RebirthTab.rebirths.Value == cycle.Rebirths do
+        local remaining = RebirthTab.nextRequestAt - os.clock()
+        if remaining > 0 then
+            RebirthTab.Status.Text = "Status: Rebirth Cooldown | " .. string.format("%.1fs", remaining)
+            task.wait(math.min(remaining, 0.1))
+        else
+            RebirthTab.nextRequestAt = os.clock() + RebirthTab.cooldown
+            pcall(function()
+                local remote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("rebirthRemote")
+                if remote then
+                    if remote:IsA("RemoteFunction") then
+                        remote:InvokeServer("rebirthRequest")
+                    elseif remote:IsA("RemoteEvent") then
+                        remote:FireServer("rebirthRequest")
+                    end
+                end
+            end)
+            RebirthTab.recordRebirth()
+        end
+    end
+end
+
+RebirthTab.startWorker = function()
+    if RebirthTab.workerActive then return end
+    RebirthTab.workerActive = true
+    runtime:Spawn(function(generation, success)
+        success = pcall(function()
+            while RebirthTab.isCurrent(generation) do
+                equipBestFarmingPets(function() return RebirthTab.isCurrent(generation) end)
+                if not RebirthTab.isCurrent(generation) then break end
+                RebirthTab.performRebirth(generation)
+                task.wait()
+            end
+        end)
+        RebirthTab.workerActive = false
+        if not success then task.wait(0.5) end
+        if RebirthTab.running then
+            RebirthTab.startWorker()
+        end
+    end, RebirthTab.generation)
+end
+
+RebirthTab.recordRebirth = function()
+    local current = RebirthTab.rebirths.Value
+    local previous = RebirthTab.statSamples.Rebirths
+    if current > previous then
+        RebirthTab.lastConfirmedAt = os.clock()
+        RebirthTab.nextRequestAt = RebirthTab.lastConfirmedAt + RebirthTab.cooldown
+        if RebirthTab.running then
+            if not RebirthTab.baselineReady then
+                RebirthTab.baselineReady = true
+                RebirthTab.statSamples.Rebirths = current
+                RebirthTab.timerStarted = true
+                RebirthTab.startedAt = os.clock()
+            else
+                RebirthTab.statGains.Rebirths = RebirthTab.statGains.Rebirths + math.max(0, current - previous)
+                RebirthTab.measuredCycles = RebirthTab.measuredCycles + 1
+                if RebirthTab.measuredCycles >= 2 then
+                    RebirthTab.updateAverage()
+                end
+            end
+        end
+    end
+    RebirthTab.statSamples.Rebirths = current
+    RebirthTab.updateStats()
+end
+
+RebirthTab.rebirths:GetPropertyChangedSignal("Value"):Connect(RebirthTab.recordRebirth)
+
+local function toggleRebirthSystem(state)
+    RebirthTab.recordRebirth()
+    RebirthTab.statSamples.Rebirths = RebirthTab.rebirths.Value
+    RebirthTab.generation = RebirthTab.generation + 1
+    RebirthTab.running = state
+    if state then
+        RebirthTab.hasStarted = true
+        RebirthTab.Status.Text = "Status: Rebirthing"
+        RebirthTab.Status.TextColor3 = Color3.fromRGB(80, 255, 120)
+        RebirthTab.updateStats()
+        RebirthTab.startWorker()
+    else
+        RebirthTab.Status.Text = RebirthTab.hasStarted and "Status: Paused" or "Status: Inactive"
+        RebirthTab.Status.TextColor3 = RebirthTab.hasStarted and Color3.fromRGB(255, 180, 70) or Color3.fromRGB(255, 80, 80)
+    end
+    RebirthTab.updateRuntime()
+end
+
+RebirthTab:CreateToggle({ Name = "Auto Rebirths combination", Description = "Sirven Golems/Packs/Dragon", Default = false }, function(state)
+    RebirthsCombination = state
+    if state then
+        RebirthChaos = false
+        RebirthsTitans = false
+        AutoRebirth = false
+        triggerCombination()
+    end
+    toggleRebirthSystem(state or RebirthChaos or RebirthsTitans)
+end)
+
+RebirthTab:CreateToggle({ Name = "Rebirth chaos", Description = "Samurai (Rep) / Tribal (Rebirth)", Default = false }, function(state)
+    RebirthChaos = state
+    if state then
+        RebirthsCombination = false
+        RebirthsTitans = false
+        AutoRebirth = false
+    end
+    toggleRebirthSystem(state or RebirthsCombination or RebirthsTitans)
+end)
+
+RebirthTab:CreateToggle({ Name = "Rebirths titans", Description = "Omega (Rep) / Titanium (Rebirth)", Default = false }, function(state)
+    RebirthsTitans = state
+    if state then
+        RebirthsCombination = false
+        RebirthChaos = false
+        AutoRebirth = false
+    end
+    toggleRebirthSystem(state or RebirthsCombination or RebirthChaos)
+end)
+
+-- ==================== AUTO ROCKS ====================
+RocksTab:AddSection("Farming de Rocas")
+
+local activeRock = nil
+
+local function getrocktool()
+    local backpack = LP:FindFirstChild("Backpack")
+    local char = LP.Character
+    if backpack and char and char:FindFirstChild("Humanoid") then
+        local punch = backpack:FindFirstChild("Punch") or char:FindFirstChild("Punch")
+        if punch and punch.Parent == backpack then
+            char.Humanoid:EquipTool(punch)
+        end
+    end
+    pcall(function()
+        if LP:FindFirstChild("muscleEvent") then
+            LP.muscleEvent:FireServer("punch", "leftHand")
+            LP.muscleEvent:FireServer("punch", "rightHand")
+        end
+    end)
+end
+
+local rockList = {
+    { Name = "Farm Tiny Island Rock", MinDur = 0, DurVal = 0 },
+    { Name = "Farm Starter Island Rock", MinDur = 100, DurVal = 100 },
+    { Name = "Farm Legend Beach Rock", MinDur = 5000, DurVal = 5000 },
+    { Name = "Farm Frost Gym Rock", MinDur = 150000, DurVal = 150000 },
+    { Name = "Farm Mythical Gym Rock", MinDur = 400000, DurVal = 400000 },
+    { Name = "Farm Eternal Gym Rock", MinDur = 750000, DurVal = 750000 },
+    { Name = "Farm Legend Gym Rock", MinDur = 1000000, DurVal = 1000000 },
+    { Name = "Farm Muscle King Gym Rock", MinDur = 5000000, DurVal = 5000000 },
+    { Name = "Farm Ancient Jungle Rock", MinDur = 10000000, DurVal = 10000000 },
+	{ Name = "Farm Industrial Jungle Rock", MinDur = 25000000, DurVal = 25000000 },
+	{ Name = "Farm Hallowed Rock", MinDur = 0, DurVal = 0 },
+}
+
+for _, rockInfo in ipairs(rockList) do
+    RocksTab:CreateToggle({
+        Name = rockInfo.Name,
+        Description = "Requiere " .. rockInfo.MinDur .. " de Durabilidad",
+        Default = false
+    }, function(bool)
+        if bool then
+            activeRock = rockInfo.Name
+            task.spawn(function()
+                while activeRock == rockInfo.Name do
+                    task.wait(0.01)
+                    pcall(function()
+                        local durabilityObj = LP:FindFirstChild("Durability")
+                        if durabilityObj and durabilityObj.Value >= rockInfo.MinDur then
+                            getrocktool()
+                            local machinesFolder = workspace:FindFirstChild("machinesFolder")
+                            if machinesFolder then
+                                for _, v in pairs(machinesFolder:GetDescendants()) do
+                                    if v.Name == "neededDurability" and v.Value == rockInfo.DurVal then
+                                        local rockPart = v.Parent and v.Parent:FindFirstChild("Rock")
+                                        local char = LP.Character
+                                        if rockPart and char then
+                                            local rightHand = char:FindFirstChild("RightHand")
+                                            local leftHand = char:FindFirstChild("LeftHand")
+                                            if rightHand and leftHand then
+                                                firetouchinterest(rockPart, rightHand, 0)
+                                                firetouchinterest(rockPart, rightHand, 1)
+                                                firetouchinterest(rockPart, leftHand, 0)
+                                                firetouchinterest(rockPart, leftHand, 1)
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end)
+                end
+            end)
+        else
+            if activeRock == rockInfo.Name then
+                activeRock = nil
+            end
+        end
+    end)
+end
+
+-- ==================== AUTO GYM ====================
+AutoGymTab:AddSection("Próximamente")
+AutoGymTab:AddLabel("Esta sección estará disponible pronto...")
+
+-- ==================== STATS ====================
+StatsTab:AddSection("Estadísticas en Tiempo Real")
+
+local stopwatchLabel = StatsTab:AddButton("Fast Rep Time: 0d 0h 0m 0s", function() end)
+local projectedStrengthLabel = StatsTab:AddButton("Strength Rate: 0/s", function() end)
+local projectedDurabilityLabel = StatsTab:AddButton("Durability Rate: 0/s", function() end)
+
+StatsTab:AddSection("Calculadora de Rebirths")
+local rebirthsRateLabel = StatsTab:AddButton("Rebirths Rate: 0/s", function() end)
+
+StatsTab:AddSection("Progreso de Estadísticas")
+local strengthLabel = StatsTab:AddButton("Strength: 0 | Gained: 0", function() end)
+local durabilityLabel = StatsTab:AddButton("Durability: 0 | Gained: 0", function() end)
+
+StatsTab:AddSection("Información de Rebirths")
+local rebirthsCountLabel = StatsTab:AddButton("Rebirths: 0 | Gained: 0", function() end)
+
+local leaderstats = LP:WaitForChild("leaderstats")
+local strengthStat = leaderstats:WaitForChild("Strength")
+local durabilityStat = LP:WaitForChild("Durability")
+local rebirthsStat = leaderstats:WaitForChild("Rebirths")
+
+local function formatExactNumber(number)
+    local formatted = tostring(math.floor(math.abs(number)))
+    local k
+    while true do
+        formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
+        if k == 0 then break end
+    end
+    return (number < 0 and "-" or "") .. formatted
+end
+
+local function formatRate(ratePerSecond)
+    return formatNumber(ratePerSecond) .. "/s | " .. formatNumber(ratePerSecond * 60) .. "/min | " .. formatNumber(ratePerSecond * 3600) .. "/h | " .. formatNumber(ratePerSecond * 86400) .. "/d"
+end
+
+local startTime = tick()
+local initialStrength = strengthStat.Value
+local initialDurability = durabilityStat.Value
+local initialRebirths = rebirthsStat.Value
+local strengthHistory = {}
+local durabilityHistory = {}
+local rebirthsHistory = {}
+local calculationInterval = 2
+
+task.spawn(function()
+    local lastCalcTime = tick()
+    while true do
+        local currentTime = tick()
+        local currentStrength = strengthStat.Value
+        local currentDurability = durabilityStat.Value
+        local currentRebirths = rebirthsStat.Value
+        
+        local elapsedTime = currentTime - startTime
+        local days = math.floor(elapsedTime / (24 * 3600))
+        local hours = math.floor((elapsedTime % (24 * 3600)) / 3600)
+        local minutes = math.floor((elapsedTime % 3600) / 60)
+        local seconds = math.floor(elapsedTime % 60)
+        stopwatchLabel.Text = string.format("Fast Rep Time: %dd %dh %dm %ds", days, hours, minutes, seconds)
+        
+        local sessionStrengthDelta = currentStrength - initialStrength
+        local sessionDurabilityDelta = currentDurability - initialDurability
+        local sessionRebirthsDelta = currentRebirths - initialRebirths
+        
+        strengthLabel.Text = "Strength: " .. formatNumber(currentStrength) .. " | Gained: " .. formatNumber(sessionStrengthDelta)
+        durabilityLabel.Text = "Durability: " .. formatNumber(currentDurability) .. " | Gained: " .. formatNumber(sessionDurabilityDelta)
+        rebirthsCountLabel.Text = "Rebirths: " .. formatExactNumber(currentRebirths) .. " | Gained: " .. formatExactNumber(sessionRebirthsDelta)
+        
+        table.insert(strengthHistory, {time = currentTime, value = currentStrength})
+        table.insert(durabilityHistory, {time = currentTime, value = currentDurability})
+        table.insert(rebirthsHistory, {time = currentTime, value = currentRebirths})
+        
+        while #strengthHistory > 0 and currentTime - strengthHistory[1].time > calculationInterval do table.remove(strengthHistory, 1) end
+        while #durabilityHistory > 0 and currentTime - durabilityHistory[1].time > calculationInterval do table.remove(durabilityHistory, 1) end
+        while #rebirthsHistory > 0 and currentTime - rebirthsHistory[1].time > calculationInterval do table.remove(rebirthsHistory, 1) end
+        
+        if currentTime - lastCalcTime >= calculationInterval then
+            lastCalcTime = currentTime
+            if #strengthHistory >= 2 then
+                local strengthDelta = strengthHistory[#strengthHistory].value - strengthHistory[1].value
+                local strengthPerSecond = strengthDelta / calculationInterval
+                projectedStrengthLabel.Text = "Strength: " .. formatRate(strengthPerSecond)
+            end
+            if #durabilityHistory >= 2 then
+                local durabilityDelta = durabilityHistory[#durabilityHistory].value - durabilityHistory[1].value
+                local durabilityPerSecond = durabilityDelta / calculationInterval
+                projectedDurabilityLabel.Text = "Durability: " .. formatRate(durabilityPerSecond)
+            end
+            if #rebirthsHistory >= 2 then
+                local rebirthsDelta = rebirthsHistory[#rebirthsHistory].value - rebirthsHistory[1].value
+                local rebirthsPerSecond = rebirthsDelta / calculationInterval
+                rebirthsRateLabel.Text = "Rebirths Rate: " .. formatRate(rebirthsPerSecond)
+            end
+        end
+        task.wait(0.2)
+    end
+end)
+
+-- ==================== GIFT / EGGS ====================
+GiftTab:AddSection("Gift Eggs")
+local proteinEggBtn = GiftTab:AddButton("Protein Eggs: 0", function() end)
+
+local function updateItemCounts()
+    local proteinEggCount = 0
+    local backpack = LP:FindFirstChild("Backpack")
+    if backpack then
+        local foundEgg = backpack:FindFirstChild("Protein Egg")
+        if foundEgg then
+            proteinEggCount = foundEgg:IsA("IntValue") and foundEgg.Value or 1
+        end
+    end
+    
+    local consumablesFolder = LP:FindFirstChild("consumablesFolder")
+    if consumablesFolder then
+        local foundEgg = consumablesFolder:FindFirstChild("Protein Egg")
+        if foundEgg then
+            proteinEggCount = foundEgg:IsA("IntValue") and foundEgg.Value or 1
+        end
+    end
+
+    proteinEggBtn.Text = "Protein Eggs: " .. proteinEggCount
+end
+
+task.spawn(function()
+    while true do
+        updateItemCounts()
+        task.wait(2)
+    end
+end)
+
+GiftTab:AddSection("Actualizar Lista")
+GiftTab:AddButton("🔄 Refresh Players / Items", function()
+    updateItemCounts()
+    pcall(function()
+        StarterGui:SetCore("SendNotification", {
+            Title = "ERDN Public",
+            Text = "Lista de jugadores y consumibles actualizada! 🔄",
+            Duration = 3
+        })
+    end)
+end)
+
+GiftTab:AddSection("Regalar Protein Eggs")
+local targetEggPlayerName = ""
+local giftEggAmount = 0
+
+GiftTab:AddTextBox("Nombre del jugador (Username)", function(text)
+    targetEggPlayerName = text
+end)
+
+GiftTab:AddTextBox("Cantidad de Eggs", function(text)
+    giftEggAmount = tonumber(text) or 0
+end)
+
+GiftTab:AddButton("Gift Protein Eggs", function()
+    if targetEggPlayerName == "" or giftEggAmount <= 0 then
+        StarterGui:SetCore("SendNotification", { Title = "Gift Error", Text = "Escribe un jugador y cantidad válida.", Duration = 3 })
+        return
+    end
+
+    local targetPlayer = nil
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr.Name:lower() == targetEggPlayerName:lower() or plr.DisplayName:lower() == targetEggPlayerName:lower() then
+            targetPlayer = plr
+            break
+        end
+    end
+
+    if not targetPlayer then
+        StarterGui:SetCore("SendNotification", { Title = "Gift Error", Text = "Jugador no encontrado.", Duration = 3 })
+        return
+    end
+
+    task.spawn(function()
+        local countSent = 0
+        local giftRemote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("giftRemote")
+        local consumablesFolder = LP:FindFirstChild("consumablesFolder")
+        
+        if giftRemote and consumablesFolder then
+            for i = 1, giftEggAmount do
+                local egg = consumablesFolder:FindFirstChild("Protein Egg")
+                if egg then
+                    pcall(function()
+                        if giftRemote:IsA("RemoteFunction") then
+                            giftRemote:InvokeServer("giftRequest", targetPlayer, egg)
+                        else
+                            giftRemote:FireServer("giftRequest", targetPlayer, egg)
+                        end
+                    end)
+                    countSent = countSent + 1
+                    task.wait(0.15)
+                else
+                    break
+                end
+            end
+        end
+        updateItemCounts()
+        StarterGui:SetCore("SendNotification", { Title = "Gift Finalizado", Text = "Se regalaron " .. countSent .. " Protein Eggs a " .. targetPlayer.DisplayName, Duration = 4 })
+    end)
+end)
+
+GiftTab:AddSection("Auto Consumir")
+local itemList = {
+    "Tropical Shake", "Energy Shake", "Protein Bar", "TOUGH Bar", "Protein Shake", "ULTRA Shake", "Energy Bar"
+}
+
+local function formatEventName(itemName)
+    local parts = {}
+    for word in itemName:gmatch("%S+") do table.insert(parts, word:lower()) end
+    for i = 2, #parts do parts[i] = parts[i]:sub(1, 1):upper() .. parts[i]:sub(2) end
+    return table.concat(parts)
+end
+
+local function activateRandomItems(count)
+    local shuffledItems = {}
+    for _, item in ipairs(itemList) do table.insert(shuffledItems, item) end
+    for i = #shuffledItems, 2, -1 do
+        local j = math.random(i)
+        shuffledItems[i], shuffledItems[j] = shuffledItems[j], shuffledItems[i]
+    end
+    for i = 1, math.min(count, #shuffledItems) do
+        local char = LP.Character
+        local backpack = LP:FindFirstChild("Backpack")
+        local tool = (char and char:FindFirstChild(shuffledItems[i])) or (backpack and backpack:FindFirstChild(shuffledItems[i]))
+        if tool and LP:FindFirstChild("muscleEvent") then
+            local eventName = formatEventName(shuffledItems[i])
+            pcall(function() LP.muscleEvent:FireServer(eventName, tool) end)
+        end
+    end
+end
+
+GiftTab:CreateToggle({
+    Name = "Eat Everything",
+    Description = "Consume consumibles aleatorios automáticamente",
+    Default = false
+}, function(state)
+    getgenv().autoEatRunning = state
+    if state then
+        task.spawn(function()
+            while getgenv().autoEatRunning do
+                activateRandomItems(4)
+                task.wait(1)
+            end
+        end)
+    end
+end)
+
+GiftTab:AddSection("Ruleta Automática")
+GiftTab:CreateToggle({
+    Name = "Auto Spin Fortune Wheel",
+    Description = "Gira la ruleta automáticamente cada 0.5s",
+    Default = false
+}, function(state)
+    _G.AutoSpinWheel = state
+    if state then
+        task.spawn(function()
+            while _G.AutoSpinWheel do
+                pcall(function()
+                    local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
+                    if rEvents then
+                        local spinRemote = rEvents:FindFirstChild("openFortuneWheelRemote")
+                        if spinRemote then
+                            spinRemote:InvokeServer("openFortuneWheel")
+                        end
+                    end
+                end)
+                task.wait(0.6)
+            end
+        end)
+    end
+end)
+
+-- ==================== BOSS ====================
+BossTab.runtime = {} 
+BossTab:AddHeading("Boss Farming") 
+BossTab.StatusLabel = BossTab:AddLabel("Status: Waiting for Boss") 
+BossTab.BossLabel = BossTab:AddLabel("Boss: None") 
+BossTab.HealthLabel = BossTab:AddLabel("Health: 0 / 0") 
+BossTab.NextBossLabel = BossTab:AddLabel("Next Boss: N/A") 
+
+BossTab.Data = { 	
+    Running = false, 	
+    Generation = 0, 	
+    Phase = "Waiting", 	
+    PunchInterval = 0.01, 
+    LastPunch = 0, 	
+    BossConfig = nil, 	
+    Bosses = {}, 	
+    BossOrder = {}, 	
+    BossByDisplayName = {}, 	
+    SelectedBosses = {} 
+} 
+
+BossTab:AddSection("Selección de Jefes (Listado)")
+
+BossTab.addBossChoice = function(modelName, displayName) 	
+    modelName = tostring(modelName or "") 	
+    displayName = tostring(displayName or modelName) 	
+    if modelName == "" or BossTab.Data.Bosses[modelName] then return end 	
+    BossTab.Data.Bosses[modelName] = displayName 	
+    BossTab.Data.BossByDisplayName[displayName] = modelName 	
+    BossTab.Data.SelectedBosses[modelName] = true 	
+    table.insert(BossTab.Data.BossOrder, modelName) 	
+
+    BossTab:CreateToggle({
+        Name = "Farm " .. displayName,
+        Description = "Activar para farmear este tipo de jefe",
+        Default = true
+    }, function(state)
+        BossTab.Data.SelectedBosses[modelName] = state
+    end)
+end 
+
+BossTab.runtime.configSuccess, BossTab.Data.BossConfig = pcall(function() 	
+    if services.isSolara then return nil end 	
+    return require(services.replicatedstorage:WaitForChild("shared"):WaitForChild("config"):WaitForChild("BossEventConfig")) 
+end) 
+
+if BossTab.runtime.configSuccess and BossTab.Data.BossConfig and BossTab.Data.BossConfig.RARITIES then 	
+    for _, rarity in ipairs(BossTab.Data.BossConfig.RARITIES) do 		
+        BossTab.addBossChoice(rarity.BossModel, rarity.DisplayName or rarity.Name or rarity.BossModel) 	
+    end 
+else 	
+    BossTab.addBossChoice("CommonBoss", "Common")
+    BossTab.addBossChoice("RareBoss", "Rare")
+    BossTab.addBossChoice("EpicBoss", "Epic")
+    BossTab.addBossChoice("LegendaryBoss", "Legendary")
+    BossTab.addBossChoice("MythicBoss", "Mythic")
+    BossTab.addBossChoice("RainbowBoss", "Rainbow")
+end 
+
+BossTab.shouldFarmBoss = function(model) 	
+    if not BossTab.Data.Bosses[model.Name] then 		
+        BossTab.addBossChoice(model.Name, workspace:GetAttribute("BossDisplayName") or model.Name) 	
+    end 	
+    return BossTab.Data.SelectedBosses[model.Name] == true 
+end 
+
+BossTab.findActiveBoss = function(model, stats, health, maxHealth, hitbox) 	
+    for _, candidate in ipairs(services.collectionservice:GetTagged("BossEventBoss")) do 		
+        if candidate:IsA("Model") and candidate:IsDescendantOf(workspace) then 			
+            model = candidate 			
+            break 		
+        end 	end 	
+    if not model then 		
+        BossTab.runtime.events = workspace:FindFirstChild("Events") 		
+        BossTab.runtime.bossFolder = BossTab.runtime.events and (BossTab.runtime.events:FindFirstChild("BossEvent") or BossTab.runtime.events:FindFirstChild("BossArena")) 		
+        if BossTab.runtime.bossFolder then 			
+            for _, candidate in ipairs(BossTab.runtime.bossFolder:GetDescendants()) do 				
+                if candidate:IsA("Model") and (candidate:FindFirstChild("BossDamageHitbox") or candidate:HasTag("BossEventBoss")) then 					
+                    model = candidate 					
+                    break 				
+                end 			
+            end 		end 	end 	
+    if not model then return end 	
+    stats = model:FindFirstChild("stats") 	
+    health = stats and stats:FindFirstChild("Health") 	
+    maxHealth = stats and stats:FindFirstChild("MaxHealth") 	
+    hitbox = model:FindFirstChild("BossDamageHitbox", true) 	
+    if not hitbox or not hitbox:IsA("BasePart") then return end 	
+    BossTab.runtime.currentHealth = health and health.Value or workspace:GetAttribute("BossHealth") 	
+    if typeof(BossTab.runtime.currentHealth) == "number" and BossTab.runtime.currentHealth <= 0 then return end 	
+    return model, health, maxHealth, hitbox 
+end 
+
+BossTab.getBossDisplayName = function(model) 	
+    return workspace:GetAttribute("BossDisplayName") or model.Name 
+end 
+
+BossTab.getBossHealth = function(health) 	
+    return health and health.Value or workspace:GetAttribute("BossHealth") or 0 
+end 
+
+BossTab.getBossMaxHealth = function(maxHealth) 	
+    return maxHealth and maxHealth.Value or workspace:GetAttribute("BossMaxHealth") or 0 
+end 
+
+BossTab.formatCountdown = function(seconds, hours, minutes) 	
+    seconds = math.max(0, math.floor(seconds or 0)) 	
+    hours = math.floor(seconds / 3600) 	
+    minutes = math.floor(seconds % 3600 / 60) 	
+    seconds = seconds % 60 	
+    return string.format("%dh %dmin %ds", hours, minutes, seconds) 
+end 
+
+BossTab.getBossHeadPosition = function(model, hitbox, head) 	
+    head = model:FindFirstChild("Head", true) or model:FindFirstChild("head", true) 	
+    if head and head:IsA("BasePart") then return head.Position end 	
+    if head and head:IsA("Bone") then return head.WorldPosition end 	
+    return hitbox.Position + Vector3.new(0, hitbox.Size.Y * 0.35, 0) 
+end 
+
+BossTab.attack = function(boss, model, health, maxHealth, hitbox, character, root, humanoid, punch, leftHand, rightHand, headPos) 	
+    character = LP.Character 	
+    root = character and character:FindFirstChild("HumanoidRootPart") 	
+    humanoid = character and character:FindFirstChildOfClass("Humanoid") 	
+    if not root or not humanoid or humanoid.Health <= 0 then return end 	
+    
+    local backpack = LP:FindFirstChild("Backpack")
+    punch = character:FindFirstChild("Punch") or backpack and backpack:FindFirstChild("Punch")
+    if punch and punch.Parent == backpack then
+        humanoid:EquipTool(punch)
+    end
+    
+    headPos = BossTab.getBossHeadPosition(model, hitbox)
+    -- Mayor altura configurada (65 studs sobre la cabeza)
+    local targetPos = headPos + Vector3.new(0, 65, 0)
+    root.CFrame = CFrame.lookAt(targetPos, headPos)
+    root.AssemblyLinearVelocity = Vector3.zero 	
+    root.AssemblyAngularVelocity = Vector3.zero 	
+    
+    leftHand = character:FindFirstChild("LeftHand") 	
+    rightHand = character:FindFirstChild("RightHand") 	
+    
+    pcall(function() 		
+        if rightHand and leftHand and hitbox then 			
+            firetouchinterest(hitbox, rightHand, 0) 			
+            firetouchinterest(hitbox, rightHand, 1) 			
+            firetouchinterest(hitbox, leftHand, 0) 			
+            firetouchinterest(hitbox, leftHand, 1) 		
+        end 	end) 	
+            
+    if os.clock() - boss.Data.LastPunch >= boss.Data.PunchInterval then 		
+        boss.Data.LastPunch = os.clock() 		
+        pcall(function() 			
+            if LP:FindFirstChild("muscleEvent") then
+                LP.muscleEvent:FireServer("punch", "leftHand") 			
+                LP.muscleEvent:FireServer("punch", "rightHand") 			
+            end
+            if punch and punch.Parent == character then 
+                punch:Activate() 
+            end 		end) 	end 	
+            
+    boss.BossLabel.Text = (boss.BossLabelPrefix or "Boss: ") .. boss.getBossDisplayName(model) 	
+    boss.runtime.health = boss.getBossHealth(health, model) 	
+    boss.runtime.maxHealth = boss.getBossMaxHealth(maxHealth, model) 	
+    boss.HealthLabel.Text = "Health: " .. formatCurrentStat(boss.runtime.health) .. " / " .. formatCurrentStat(boss.runtime.maxHealth) 
+end 
+
+BossTab.findChest = function(chest, prompt, part) 	
+    for _, candidate in ipairs(services.collectionservice:GetTagged("BossEventChest")) do 		
+        if candidate:IsDescendantOf(workspace) then chest = candidate break end 	end 	
+    if not chest then chest = workspace:FindFirstChild("BossChest", true) end 	
+    if not chest then 		
+        for _, candidate in ipairs(workspace:GetDescendants()) do 			
+            if candidate:IsA("ProximityPrompt") and candidate.Name == "bossChestPrompt" then 				
+                chest = candidate.Parent 				
+                break 			
+            end 		end 	end 	
+    if not chest then return end 	
+    prompt = chest:FindFirstChild("bossChestPrompt", true) 	
+    part = prompt and prompt.Parent or (chest:IsA("Model") and (chest.PrimaryPart or chest:FindFirstChildWhichIsA("BasePart", true))) or chest 	
+    if part and part:IsA("BasePart") then return chest, prompt, part end 
+end 
+
+BossTab.collectChest = function(generation, startedAt, chest, prompt, part, character, root) 	
+    BossTab.StatusLabel.Text = "Status: Waiting for Chest" 	
+    startedAt = os.clock() 	
+    repeat 		
+        chest, prompt, part = BossTab.findChest() 		
+        if chest and chest:GetAttribute("BossChestEmerging") ~= true then break end 		
+        task.wait(0.15) 	
+    until not BossTab.Data.Running or BossTab.Data.Generation ~= generation or os.clock() - startedAt >= 12 	
+    if not BossTab.Data.Running or BossTab.Data.Generation ~= generation or not chest or not part then return end 	
+    BossTab.StatusLabel.Text = "Status: Collecting Chest" 	
+    startedAt = os.clock() 	
+    repeat 		
+        character, root = BossTab.getAliveCharacter(generation, 2) 		
+        if character and root and chest.Parent and part.Parent then 			
+            BossTab.StatusLabel.Text = "Status: Collecting Chest" 			
+            pcall(function() 				
+                root.CFrame = CFrame.lookAt(part.Position + Vector3.new(0, 3, 4), part.Position) 				
+                root.AssemblyLinearVelocity = Vector3.zero 			end) 			
+            task.wait(0.2) 			
+            if not BossTab.Data.Running or BossTab.Data.Generation ~= generation then return end 			
+            if not (prompt and prompt.Parent and type(fireproximityprompt) == "function" and pcall(fireproximityprompt, prompt)) then 				
+                pcall(function() 					
+                    services.virtualinputmanager:SendKeyEvent(true, Enum.KeyCode.E, false, game) 					
+                    task.wait(0.1) 					
+                    services.virtualinputmanager:SendKeyEvent(false, Enum.KeyCode.E, false, game) 				end) 			
+            end 		end 		
+        task.wait(0.3) 	
+    until not BossTab.Data.Running or BossTab.Data.Generation ~= generation or lp.player:GetAttribute("BossChestPending") == false or not chest.Parent or os.clock() - startedAt >= 12 
+end 
+
+runtime:Spawn(function(model, health, maxHealth, hitbox, currentHealth, currentMaxHealth, nextTime) 	
+    while true do 		
+        model, health, maxHealth, hitbox = BossTab.findActiveBoss() 		
+        if model then 			
+            currentHealth = BossTab.getBossHealth(health) 			
+            currentMaxHealth = BossTab.getBossMaxHealth(maxHealth) 			
+            BossTab.BossLabel.Text = "Boss: " .. (workspace:GetAttribute("BossDisplayName") or model.Name) 			
+            BossTab.HealthLabel.Text = "Health: " .. formatCurrentStat(currentHealth) .. " / " .. formatCurrentStat(currentMaxHealth) 			
+            BossTab.NextBossLabel.Text = "Next Boss: Current boss active" 		
+        else 			
+            BossTab.BossLabel.Text = "Boss: None" 			
+            BossTab.HealthLabel.Text = "Health: 0 / 0" 			
+            nextTime = workspace:GetAttribute("BossSpawnNextTime") 			
+            BossTab.NextBossLabel.Text = typeof(nextTime) == "number" and "Next Boss: " .. BossTab.formatCountdown(nextTime - workspace:GetServerTimeNow()) or "Next Boss: N/A" 		end 		
+        task.wait(0.4) 	end 
+end) 
+
+BossTab.AutoFarmSwitch = BossTab:AddSwitch("Auto Farm Boss", function(state) 	
+    if state and BossTab.Halloween and BossTab.Halloween.Data.Running then 	
+        BossTab.Halloween.AutoFarmSwitch:Set(false) 	
+    end 	
+    BossTab.Data.Running = state 	
+    BossTab.Data.Generation = BossTab.Data.Generation + 1 	
+    BossTab.runtime.generation = BossTab.Data.Generation 	
+    if not state then 		
+        BossTab.Data.Phase = "Waiting" 		
+        BossTab.StatusLabel.Text = "Status: Disabled" 		
+        return 	end 	
+    runtime:Spawn(function(generation, model, health, maxHealth, hitbox, selected) 		
+        while BossTab.Data.Running and BossTab.Data.Generation == generation do 			
+            pcall(function() 				
+                model, health, maxHealth, hitbox = BossTab.findActiveBoss() 				
+                selected = model and BossTab.shouldFarmBoss(model) 				
+                if model and not selected then 					
+                    BossTab.Data.Phase = "Waiting" 					
+                    BossTab.StatusLabel.Text = "Status: Skipping " .. (workspace:GetAttribute("BossDisplayName") or model.Name) 				
+                elseif model then 					
+                    BossTab.Data.Phase = "Fighting" 					
+                    if lp.player.Character and lp.player.Character:FindFirstChildOfClass("Humanoid") and lp.player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then 						
+                        BossTab.StatusLabel.Text = "Status: Fighting" 						
+                        BossTab.attack(BossTab, model, health, maxHealth, hitbox) 					
+                    else 						
+                        BossTab.StatusLabel.Text = "Status: Waiting for Respawn" 					end 				
+                else 					
+                    BossTab.Data.Phase = "Waiting" 					
+                    BossTab.StatusLabel.Text = "Status: Waiting for Boss" 				
+                end 			
+            end) 			
+            task.wait(model and selected and 0.01 or 0.4) 		
+        end 	end, BossTab.runtime.generation) 
+end) 
+
+-- ==================== HALLOWEEN BOSS FARMING ====================
+BossTab:AddLabel("") 
+BossTab:AddHeading("Halloween Boss Farming") 
+
+BossTab.Halloween = { 	
+    runtime = {}, 	
+    BossLabelPrefix = "Halloween Boss: ", 	
+    StatusLabel = BossTab:AddLabel("Status: Waiting for Halloween Boss"), 	
+    BossLabel = BossTab:AddLabel("Halloween Boss: None"), 	
+    HealthLabel = BossTab:AddLabel("Health: 0 / 0"), 	
+    NextBossLabel = BossTab:AddLabel("Next Halloween Boss: Waiting for spawn"), 	
+    Data = { 		
+        Running = false, 		
+        Generation = 0, 		
+        Phase = "Waiting", 		
+        PunchInterval = 0.01, 		
+        LastPunch = 0, 		
+        Bosses = { 			
+            GrimReaper = "Grim Reaper", 			
+            FrankenBrute = "Frankenbrute", 			
+            PumpkinTitan = "Pumpkin Titan", 			
+            ScarecrowColossus = "Scarecrow Colossus" 		}, 		
+        BossOrder = {"GrimReaper", "FrankenBrute", "PumpkinTitan", "ScarecrowColossus"}, 		
+        BossByDisplayName = {}, 		
+        SelectedBosses = {}, 		
+        Target = nil 	
+    } 
+} 
+
+BossTab.Halloween.getBossDisplayName = function(model) 	
+    return BossTab.Halloween.Data.Bosses[model:GetAttribute("BossId") or model.Name] or model.Name 
+end 
+
+BossTab.Halloween.getBossHealth = function(health, model) 	
+    return tonumber(model:GetAttribute("Health")) or 0 
+end 
+
+BossTab.Halloween.getBossMaxHealth = function(maxHealth, model) 	
+    return tonumber(model:GetAttribute("MaxHealth")) or 0 
+end 
+
+BossTab:AddSection("Selección Halloween Bosses")
+
+for _, bossId in ipairs(BossTab.Halloween.Data.BossOrder) do 	
+    local displayName = BossTab.Halloween.Data.Bosses[bossId]
+    BossTab.Halloween.Data.BossByDisplayName[displayName] = bossId 	
+    BossTab.Halloween.Data.SelectedBosses[bossId] = true 	
+    
+    BossTab:CreateToggle({
+        Name = "Farm " .. displayName,
+        Description = "Activar para farmear a " .. displayName,
+        Default = true
+    }, function(state)
+        BossTab.Halloween.Data.SelectedBosses[bossId] = state
+    end)
+end 
+
+BossTab.Halloween.shouldFarmBoss = function(model) 	
+    return BossTab.Halloween.Data.SelectedBosses[model:GetAttribute("BossId") or model.Name] == true 
+end 
+
+BossTab.Halloween.findActiveBoss = function(selectedOnly, model, hitbox, candidateHitbox, character, root, distance, closestDistance) 	
+    character = lp.player.Character 	
+    root = character and character:FindFirstChild("HumanoidRootPart") 	
+    closestDistance = math.huge 	
+    for _, candidate in ipairs(services.collectionservice:GetTagged("HalloweenBoss")) do 		
+        if candidate:IsA("Model") and candidate:IsDescendantOf(workspace) and BossTab.Halloween.getBossHealth(nil, candidate) > 0 and (not selectedOnly or BossTab.Halloween.shouldFarmBoss(candidate)) then 			
+            candidateHitbox = candidate:FindFirstChild("BossDamageHitbox", true) or candidate.PrimaryPart or candidate:FindFirstChild("HumanoidRootPart") 			
+            if candidateHitbox and candidateHitbox:IsA("BasePart") then 				
+                if selectedOnly and candidate == BossTab.Halloween.Data.Target then 					
+                    return candidate, nil, nil, candidateHitbox 				end 				
+                distance = root and (root.Position - candidateHitbox.Position).Magnitude or 0 				
+                if not model or distance < closestDistance then 					
+                    model, hitbox, closestDistance = candidate, candidateHitbox, distance 				end 			
+            end 		end 	end 	
+    return model, nil, nil, hitbox 
+end 
+
+runtime:Spawn(function(model) 	
+    while true do 		
+        model = BossTab.Halloween.Data.Target 		
+        if not model or not model.Parent or BossTab.Halloween.getBossHealth(nil, model) <= 0 then 			
+            model = BossTab.Halloween.findActiveBoss() 		end 		
+        if model then 			
+            BossTab.Halloween.BossLabel.Text = "Halloween Boss: " .. BossTab.Halloween.getBossDisplayName(model) 			
+            BossTab.Halloween.HealthLabel.Text = "Health: " .. formatCurrentStat(BossTab.Halloween.getBossHealth(nil, model)) .. " / " .. formatCurrentStat(BossTab.Halloween.getBossMaxHealth(nil, model)) 			
+            BossTab.Halloween.NextBossLabel.Text = "Next Halloween Boss: Current boss active" 		
+        else 			
+            BossTab.Halloween.BossLabel.Text = "Halloween Boss: None" 			
+            BossTab.Halloween.HealthLabel.Text = "Health: 0 / 0" 			
+            BossTab.Halloween.NextBossLabel.Text = "Next Halloween Boss: Waiting for spawn" 		end 		
+        task.wait(0.4) 	end 
+end) 
+
+BossTab.Halloween.AutoFarmSwitch = BossTab:AddSwitch("Auto Farm Halloween Boss", function(state) 	
+    if state and BossTab.Data.Running then BossTab.AutoFarmSwitch:Set(false) end 	
+    BossTab.Halloween.Data.Running = state 	
+    BossTab.Halloween.Data.Generation = BossTab.Halloween.Data.Generation + 1 	
+    if not state then 		
+        BossTab.Halloween.Data.Target = nil 		
+        BossTab.Halloween.Data.Phase = "Waiting" 		
+        BossTab.Halloween.StatusLabel.Text = "Status: Disabled" 		
+        return 	end 	
+    runtime:Spawn(function(generation, model, health, maxHealth, hitbox) 		
+        while BossTab.Halloween.Data.Running and BossTab.Halloween.Data.Generation == generation do 			
+            pcall(function() 				
+                model, health, maxHealth, hitbox = BossTab.Halloween.findActiveBoss(true) 				
+                if model then 					
+                    if BossTab.Halloween.Data.Target ~= model then 						
+                        BossTab.Halloween.Data.Target = model 					end 					
+                    BossTab.Halloween.Data.Phase = "Fighting" 					
+                    if lp.player.Character and lp.player.Character:FindFirstChildOfClass("Humanoid") and lp.player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then 						
+                        BossTab.Halloween.StatusLabel.Text = "Status: Fighting" 						
+                        BossTab.attack(BossTab.Halloween, model, health, maxHealth, hitbox) 					
+                    else 						
+                        BossTab.Halloween.StatusLabel.Text = "Status: Waiting for Respawn" 					end 				
+                else 					
+                    BossTab.Halloween.Data.Target = nil 					
+                    BossTab.Halloween.Data.Phase = "Waiting" 					
+                    BossTab.Halloween.StatusLabel.Text = "Status: Waiting for Halloween Boss" 				end 			
+            end) 			
+            task.wait(model and 0.01 or 0.4) 		
+        end 	end, BossTab.Halloween.Data.Generation) 
+end)
+
+-- ==================== ZONAS DEL MAPA (TELEPORT) ====================
+TeleportTab:AddSection("Zonas del Mapa")
+local function tpTo(cf, name)
+    pcall(function()
+        local character = LP.Character or LP.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        humanoidRootPart.CFrame = cf
+        StarterGui:SetCore("SendNotification", {
+            Title = "Teletransporte",
+            Text = "Teleported to " .. name,
+            Duration = 3
+        })
+    end)
+end
+
+TeleportTab:AddButton("Spawn", function() tpTo(CFrame.new(2, 8, 115), "Spawn") end)
+TeleportTab:AddButton("Secret Area", function() tpTo(CFrame.new(1947, 2, 6191), "Secret Area") end)
+TeleportTab:AddButton("Tiny Island", function() tpTo(CFrame.new(-34, 7, 1903), "Tiny Island") end)
+TeleportTab:AddButton("Frozen Island", function() tpTo(CFrame.new(-2600.00244, 3.67686558, -403.884369, 0.0873617008, 1.0482899e-09, 0.99617666, 3.07204253e-08, 1, -3.7464023e-09, -0.99617666, 3.09302628e-08, 0.0873617008), "Frozen Island") end)
+TeleportTab:AddButton("Mythical Island", function() tpTo(CFrame.new(2255, 7, 1071), "Mythical Island") end)
+TeleportTab:AddButton("Eternal Island", function() tpTo(CFrame.new(-6768, 7, -1287), "Eternal Island") end)
+TeleportTab:AddButton("Legend Island", function() tpTo(CFrame.new(4604, 991, -3887), "Legend Island") end)
+TeleportTab:AddButton("Muscle King Island", function() tpTo(CFrame.new(-8748, 123, -5865), "Muscle King") end)
+TeleportTab:AddButton("Jungle Island", function() tpTo(CFrame.new(-8659, 6, 2384), "Jungle Island") end)
+TeleportTab:AddButton("Industrial Gym", function() tpTo(CFrame.new(-5563.23388671875, 60.47392654418945, 4942.44482421875), "Industrial Gym") end)
+TeleportTab:AddButton("Halloween Gym", function() tpTo(CFrame.new(5558, 86, 5838), "Halloween Gym") end)
+
+-- ==================== CONFIGURACIÓN ====================
+SettingsTab:AddSection("Protección y Anti-Cheat")
+SettingsTab:CreateToggle({
+    Name = "Anti-Cheat / Kick Protection",
+    Description = "Evita que el juego te expulse mediante la función Kick",
+    Default = AntiCheatActive
+}, function(state)
+    AntiCheatActive = state
+    SaveConfig()
+    pcall(function()
+        StarterGui:SetCore("SendNotification", {
+            Title = "ERDN Public",
+            Text = state and "Anti-Cheat Activado 🛡️" or "Anti-Cheat Desactivado ❌",
+            Duration = 3
+        })
+    end)
+end)
+
+SettingsTab:AddSection("Auto Execute")
+SettingsTab:CreateToggle({
+    Name = "Auto Execute",
+    Description = "Guarda el estado del script para autoejecutarse al ingresar",
+    Default = AutoExecuteActive
+}, function(state)
+    AutoExecuteActive = state
+    SaveConfig()
+    pcall(function()
+        StarterGui:SetCore("SendNotification", {
+            Title = "ERDN Public",
+            Text = state and "Auto Execute Activado ⚙️" or "Auto Execute Desactivado ❌",
+            Duration = 3
+        })
+    end)
+end)
+
+SettingsTab:AddSection("Auto Rejoin")
+SettingsTab:CreateToggle({
+    Name = "Auto Rejoin",
+    Description = "Reconecta automáticamente al servidor si sufres una desconexión",
+    Default = AutoRejoinActive
+}, function(state)
+    AutoRejoinActive = state
+    SaveConfig()
+    pcall(function()
+        StarterGui:SetCore("SendNotification", {
+            Title = "ERDN Public",
+            Text = state and "Auto Rejoin Activado 🔄" or "Auto Rejoin Desactivado ❌",
+            Duration = 3
+        })
+    end)
+end)
