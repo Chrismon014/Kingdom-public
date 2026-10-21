@@ -1,0 +1,156 @@
+-- ==================== SISTEMA DE KEY (ERDNONTOP) ====================
+local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
+local StarterGui = game:GetService("StarterGui")
+
+local LP = Players.LocalPlayer
+local CORRECT_KEY = "ERDNONTOP"
+local DISCORD_LINK = "https://discord.gg/tu-enlace-aqui" -- Cambia esto por tu link de Discord
+
+local parentUI = (gethui and gethui()) or CoreGui or LP:WaitForChild("PlayerGui")
+if parentUI:FindFirstChild("KingdomPublic_KeySystem") then
+    parentUI.KingdomPublic_KeySystem:Destroy()
+end
+
+local KeyScreenGui = Instance.new("ScreenGui")
+KeyScreenGui.Name = "KingdomPublic_KeySystem"
+KeyScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+KeyScreenGui.IgnoreGuiInset = true
+KeyScreenGui.Parent = parentUI
+
+local KeyMainFrame = Instance.new("Frame")
+KeyMainFrame.Name = "KeyMainFrame"
+KeyMainFrame.BackgroundColor3 = Color3.fromRGB(2, 6, 14)
+KeyMainFrame.BackgroundTransparency = 0.2
+KeyMainFrame.BorderSizePixel = 0
+KeyMainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+KeyMainFrame.Size = UDim2.new(0, 380, 0, 230)
+KeyMainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+KeyMainFrame.Parent = KeyScreenGui
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 14)
+UICorner.Parent = KeyMainFrame
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = Color3.fromRGB(0, 180, 255)
+UIStroke.Thickness = 1.2
+UIStroke.Transparency = 0.3
+UIStroke.Parent = KeyMainFrame
+
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Size = UDim2.new(1, 0, 0, 40)
+TitleLabel.Position = UDim2.new(0, 0, 0, 15)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = "🔐 Kingdom Public - Key System"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextSize = 15
+TitleLabel.Parent = KeyMainFrame
+
+local TextBox = Instance.new("TextBox")
+TextBox.Size = UDim2.new(1, -50, 0, 42)
+TextBox.Position = UDim2.new(0, 25, 0, 65)
+TextBox.BackgroundColor3 = Color3.fromRGB(4, 12, 26)
+TextBox.BackgroundTransparency = 0.4
+TextBox.BorderSizePixel = 0
+TextBox.PlaceholderText = "Ingresa tu Key aquí..."
+TextBox.Text = ""
+TextBox.TextColor3 = Color3.fromRGB(240, 245, 255)
+TextBox.PlaceholderColor3 = Color3.fromRGB(110, 140, 180)
+TextBox.Font = Enum.Font.GothamMedium
+TextBox.TextSize = 13
+TextBox.Parent = KeyMainFrame
+
+local BoxCorner = Instance.new("UICorner")
+BoxCorner.CornerRadius = UDim.new(0, 8)
+BoxCorner.Parent = TextBox
+
+local VerifyBtn = Instance.new("TextButton")
+VerifyBtn.Size = UDim2.new(0, 155, 0, 38)
+VerifyBtn.Position = UDim2.new(0, 25, 0, 125)
+VerifyBtn.BackgroundColor3 = Color3.fromRGB(0, 140, 220)
+VerifyBtn.BackgroundTransparency = 0.2
+VerifyBtn.BorderSizePixel = 0
+VerifyBtn.Text = "Validar Key"
+VerifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+VerifyBtn.Font = Enum.Font.GothamBold
+VerifyBtn.TextSize = 13
+VerifyBtn.Parent = KeyMainFrame
+
+local VerifyCorner = Instance.new("UICorner")
+VerifyCorner.CornerRadius = UDim.new(0, 8)
+VerifyCorner.Parent = VerifyBtn
+
+local GetKeyBtn = Instance.new("TextButton")
+GetKeyBtn.Size = UDim2.new(0, 155, 0, 38)
+GetKeyBtn.Position = UDim2.new(1, -180, 0, 125)
+GetKeyBtn.BackgroundColor3 = Color3.fromRGB(20, 35, 60)
+GetKeyBtn.BackgroundTransparency = 0.3
+GetKeyBtn.BorderSizePixel = 0
+GetKeyBtn.Text = "Get Key (Discord)"
+GetKeyBtn.TextColor3 = Color3.fromRGB(0, 210, 255)
+GetKeyBtn.Font = Enum.Font.GothamBold
+GetKeyBtn.TextSize = 13
+GetKeyBtn.Parent = KeyMainFrame
+
+local GetKeyCorner = Instance.new("UICorner")
+GetKeyCorner.CornerRadius = UDim.new(0, 8)
+GetKeyCorner.Parent = GetKeyBtn
+
+local StatusLabel = Instance.new("TextLabel")
+StatusLabel.Size = UDim2.new(1, 0, 0, 20)
+StatusLabel.Position = UDim2.new(0, 0, 0, 180)
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Text = "Introduce la clave para continuar"
+StatusLabel.TextColor3 = Color3.fromRGB(130, 170, 210)
+StatusLabel.Font = Enum.Font.Gotham
+StatusLabel.TextSize = 11
+StatusLabel.Parent = KeyMainFrame
+
+-- Botón Get Key (Copia el link o abre el navegador si el exploit lo soporta)
+GetKeyBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        if setclipboard then
+            setclipboard(DISCORD_LINK)
+            StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 150)
+            StatusLabel.Text = "¡Link de Discord copiado al portapapeles! 📋"
+        elseif request then
+            request({
+                Url = "http://127.0.0.1:6463/rpc?v=1",
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json",
+                    ["Origin"] = "https://discord.com"
+                },
+                Body = HttpService:JSONEncode({
+                    cmd = "BrowserOpen",
+                    args = { uri = DISCORD_LINK },
+                    nonce = HttpService:GenerateGUID(false)
+                })
+            })
+            StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 150)
+            StatusLabel.Text = "Abriendo Discord... 🚀"
+        end
+    end)
+end)
+
+-- Validación de Key
+VerifyBtn.MouseButton1Click:Connect(function()
+    if TextBox.Text == CORRECT_KEY then
+        StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 100)
+        StatusLabel.Text = "¡Key Correcta! Cargando script... 🎉"
+        task.wait(1)
+        KeyScreenGui:Destroy()
+        
+        -- ==================== AQUÍ CARGA TU SCRIPT PRINCIPAL ====================
+        print("Script principal ejecutado con éxito.")
+        -- (Tu código principal va aquí abajo si lo deseas correr integrado)
+        
+    else
+        StatusLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+        StatusLabel.Text = "Key Incorrecta. Inténtalo de nuevo ❌"
+    end
+end)
