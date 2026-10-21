@@ -1,4 +1,4 @@
--- ==================== SISTEMA DE KEY (ERDNONTOP) ====================
+-- ==================== SISTEMA DE KEY + CARGA REMOTA (ERDNONTOP) ====================
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -7,7 +7,8 @@ local StarterGui = game:GetService("StarterGui")
 
 local LP = Players.LocalPlayer
 local CORRECT_KEY = "ERDNONTOP"
-local DISCORD_LINK = "https://discord.gg/tu-enlace-aqui" -- Cambia esto por tu link de Discord
+local SCRIPT_URL = "https://raw.githubusercontent.com/Chrismon014/Kingdom-public/refs/heads/main/ERDN"
+local DISCORD_LINK = "https://discord.gg/TmRWbBkpUd"
 
 local parentUI = (gethui and gethui()) or CoreGui or LP:WaitForChild("PlayerGui")
 if parentUI:FindFirstChild("KingdomPublic_KeySystem") then
@@ -110,7 +111,7 @@ StatusLabel.Font = Enum.Font.Gotham
 StatusLabel.TextSize = 11
 StatusLabel.Parent = KeyMainFrame
 
--- Botón Get Key (Copia el link o abre el navegador si el exploit lo soporta)
+-- Botón Get Key (Discord)
 GetKeyBtn.MouseButton1Click:Connect(function()
     pcall(function()
         if setclipboard then
@@ -137,7 +138,7 @@ GetKeyBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- Validación de Key
+-- Validación de Key y ejecución remota
 VerifyBtn.MouseButton1Click:Connect(function()
     if TextBox.Text == CORRECT_KEY then
         StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 100)
@@ -145,9 +146,14 @@ VerifyBtn.MouseButton1Click:Connect(function()
         task.wait(1)
         KeyScreenGui:Destroy()
         
-        -- ==================== AQUÍ CARGA TU SCRIPT PRINCIPAL ====================
-        print("Script principal ejecutado con éxito.")
-        -- (Tu código principal va aquí abajo si lo deseas correr integrado)
+        -- Carga el script principal desde tu GitHub de forma segura
+        local success, err = pcall(function()
+            loadstring(game:HttpGet(SCRIPT_URL))()
+        end)
+        
+        if not success then
+            warn("Error al cargar el script remoto: " .. tostring(err))
+        end
         
     else
         StatusLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
