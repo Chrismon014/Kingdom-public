@@ -1,4 +1,4 @@
--- ==================== SISTEMA UNIFICADO ERDN (AUTO REBIRTH SIMPLE + RESTO DE FUNCIONES) ====================
+-- ==================== SISTEMA UNIFICADO ERDN (BOSS POSICIÓN PEGADA A 3 STUDS + CALCULADORA) ====================
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -18,7 +18,7 @@ local DISCORD_LINK = "https://discord.gg/TmRWbBkpUd"
 
 local parentUI = (gethui and gethui()) or CoreGui or LP:WaitForChild("PlayerGui")
 
--- ==================== 1. INTRO CINEMÁTICA DE HALLOWEEN ====================
+-- ==================== 1. INTRO CINEMÁTICA ====================
 if parentUI:FindFirstChild("ERDN_IntroGui") then
     parentUI.ERDN_IntroGui:Destroy()
 end
@@ -250,7 +250,7 @@ GetKeyBtn.MouseButton1Click:Connect(function()
 end)
 
 local function InitMainScript()
-    -- ==================== 3. SCRIPT PRINCIPAL COMPLETO Y CORREGIDO ====================
+    -- ==================== 3. SCRIPT PRINCIPAL ====================
     local services = {
         replicatedstorage = ReplicatedStorage,
         virtualinputmanager = game:GetService("VirtualInputManager"),
@@ -261,7 +261,6 @@ local function InitMainScript()
 
     local lp = { player = LP }
 
-    -- Anti-AFK
     LP.Idled:Connect(function()
         VirtualUser:CaptureController()
         VirtualUser:ClickButton2(Vector2.new())
@@ -384,7 +383,6 @@ local function InitMainScript()
         end
     end)
 
-    -- FUNCIÓN PARA DISPARAR EL RENACIMIENTO SIMPLE
     local function triggerRebirthRemote()
         pcall(function()
             local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
@@ -396,7 +394,7 @@ local function InitMainScript()
         end)
     end
 
-    -- ==================== LÓGICA DE AUTO REBIRTH SIMPLE (SIN CAMBIO DE PETS) ====================
+    -- AUTO REBIRTH SIMPLE
     task.spawn(function()
         while true do
             if AutoRebirth then
@@ -410,7 +408,7 @@ local function InitMainScript()
         end
     end)
 
-    -- MASCOTAS Y SISTEMA DE CARGA PARA REBIRTHS AVANZADOS (Combination, Chaos, Titans)
+    -- MASCOTAS Y SISTEMA DE CARGA
     local PETS = {
         ["Omega Overlord"] = { repSpeed = 20, strength = 0, durability = 0, rebirth = 0 },
         ["Swift Samurai"] = { repSpeed = 15, strength = 0, durability = 0, rebirth = 0 },
@@ -532,7 +530,7 @@ local function InitMainScript()
         applyPetLoadout(selected)
     end
 
-    -- ==================== LÓGICA DE REBIRTHS AVANZADOS (Combination, Chaos, Titans) ====================
+    -- REBIRTHS AVANZADOS
     task.spawn(function()
         local lastEquipMode = nil
         while true do
@@ -570,7 +568,7 @@ local function InitMainScript()
         end
     end)
 
-    -- FARMING DE REPETICIONES ULTRA-RÁPIDAS
+    -- FARMING
     local function createFarmLoop(getState, rate, burst)
         task.spawn(function()
             local cachedEvent = LP:FindFirstChild("muscleEvent")
@@ -772,7 +770,7 @@ local function InitMainScript()
     local RebirthTab = Window:CreateTab("Rebirth", "🌌", "Fast Renacimientos")
     local RocksTab = Window:CreateTab("Auto Rocks", "⛰️", "Farm Rocks")
     local AutoGymTab = Window:CreateTab("Auto Gym", "🏋️‍♂️", "Gimnasio Automático")
-    local StatsTab = Window:CreateTab("Stats", "📊", "Estadisticas")
+    local StatsTab = Window:CreateTab("Stats", "📊", "Calculadora Matemática Fija")
     local GiftTab = Window:CreateTab("Gift", "🎁", "Regala eggs")
     local BossTab = Window:CreateTab("Boss", "👹", "Sistema de Bosses")
     local TeleportTab = Window:CreateTab("Teleport", "🌀", "TPs")
@@ -900,35 +898,49 @@ local function InitMainScript()
     AutoGymTab:AddSection("Próximamente")
     AutoGymTab:AddLabel("Esta sección estará disponible pronto...")
 
-    -- STATS
-    StatsTab:AddSection("Estadísticas en Tiempo Real")
-    local stopwatchLabel = StatsTab:AddButton("Fast Rep Time: 0d 0h 0m 0s", function() end)
-    local strengthLabel = StatsTab:AddButton("Strength: 0 | Gained: 0", function() end)
-    local durabilityLabel = StatsTab:AddButton("Durability: 0 | Gained: 0", function() end)
-    local rebirthsCountLabel = StatsTab:AddButton("Rebirths: 0 | Gained: 0", function() end)
+    -- CALCULADORA DIRECTA MATEMÁTICA
+    StatsTab:AddSection("Estado Actual")
+    local currentStatsBtn = StatsTab:AddButton("Fuerza: 0 | Rebirths: 0", function() end)
+
+    StatsTab:AddSection("Proyección Teórica de Rebirths")
+    local rebHourBtn = StatsTab:AddButton("⏳ Rebirths por Hora (1h): 0", function() end)
+    local rebDayBtn = StatsTab:AddButton("📅 Rebirths por Día (24h): 0", function() end)
+    local rebWeekBtn = StatsTab:AddButton("📆 Rebirths por Semana (7d): 0", function() end)
+
+    StatsTab:AddSection("Proyección Teórica de Fuerza")
+    local strHourBtn = StatsTab:AddButton("⚡ Fuerza por Hora (1h): 0", function() end)
+    local strDayBtn = StatsTab:AddButton("⚡ Fuerza por Día (24h): 0", function() end)
 
     local leaderstats = LP:WaitForChild("leaderstats")
     local strengthStat = leaderstats:WaitForChild("Strength")
     local durabilityStat = LP:WaitForChild("Durability")
     local rebirthsStat = leaderstats:WaitForChild("Rebirths")
 
-    local startTime = tick()
-    local initialStrength = strengthStat.Value
-    local initialDurability = durabilityStat.Value
-    local initialRebirths = rebirthsStat.Value
-
     task.spawn(function()
         while true do
-            local currentTime = tick()
-            local elapsedTime = currentTime - startTime
-            local days = math.floor(elapsedTime / (24 * 3600))
-            local hours = math.floor((elapsedTime % (24 * 3600)) / 3600)
-            local minutes = math.floor((elapsedTime % 3600) / 60)
-            local seconds = math.floor(elapsedTime % 60)
-            stopwatchLabel.Text = string.format("Fast Rep Time: %dd %dh %dm %ds", days, hours, minutes, seconds)
-            strengthLabel.Text = "Strength: " .. formatNumber(strengthStat.Value) .. " | Gained: " .. formatNumber(strengthStat.Value - initialStrength)
-            durabilityLabel.Text = "Durability: " .. formatNumber(durabilityStat.Value) .. " | Gained: " .. formatNumber(durabilityStat.Value - initialDurability)
-            rebirthsCountLabel.Text = "Rebirths: " .. tostring(rebirthsStat.Value) .. " | Gained: " .. tostring(rebirthsStat.Value - initialRebirths)
+            local currentRebirths = rebirthsStat.Value
+            local currentStrength = strengthStat.Value
+            currentStatsBtn.Text = "Fuerza: " .. formatNumber(currentStrength) .. " | Rebirths: " .. formatNumber(currentRebirths)
+
+            local repRatePerSec = FastFarm1k5k and 1200 or (FastFarm800 and 800 or 50)
+            local requiredStrength = 5000 + (currentRebirths * 2550)
+
+            local timePerRebirthSeconds = math.max(requiredStrength / math.max(repRatePerSec, 1), 0.1)
+
+            local rebirthsPerHour = 3600 / timePerRebirthSeconds
+            local rebirthsPerDay = 86400 / timePerRebirthSeconds
+            local rebirthsPerWeek = 604800 / timePerRebirthSeconds
+
+            local strengthPerHour = repRatePerSec * 3600
+            local strengthPerDay = repRatePerSec * 86400
+
+            rebHourBtn.Text = string.format("⏳ Rebirths por Hora (1h): %s", formatNumber(rebirthsPerHour))
+            rebDayBtn.Text = string.format("📅 Rebirths por Día (24h): %s", formatNumber(rebirthsPerDay))
+            rebWeekBtn.Text = string.format("📆 Rebirths por Semana (7d): %s", formatNumber(rebirthsPerWeek))
+
+            strHourBtn.Text = string.format("⚡ Fuerza por Hora (1h): %s", formatNumber(strengthPerHour))
+            strDayBtn.Text = string.format("⚡ Fuerza por Día (24h): %s", formatNumber(strengthPerDay))
+
             task.wait(0.5)
         end
     end)
@@ -958,7 +970,7 @@ local function InitMainScript()
         end
     end)
 
-    -- ==================== SISTEMA COMPLETO DE BOSS & HALLOWEEN BOSS ====================
+    -- ==================== SISTEMA DE BOSS (POSICIÓN PEGADA A 3 STUDS) ====================
     BossTab:AddHeading("Boss Farming (Normal)")
     BossTab.StatusLabel = BossTab:AddLabel("Status: Waiting for Boss")
     BossTab.BossLabel = BossTab:AddLabel("Boss: None")
@@ -1011,8 +1023,9 @@ local function InitMainScript()
                             local char = LP.Character
                             if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChildOfClass("Humanoid").Health > 0 then
                                 local root = char.HumanoidRootPart
-                                local headPos = hitbox.Position + Vector3.new(0, hitbox.Size.Y * 0.35, 0)
-                                root.CFrame = CFrame.lookAt(headPos + Vector3.new(0, 65, 0), headPos)
+                                -- ALTURA MÁS BAJA: Hitbox + 3 Studs directos sobre la cabeza
+                                local targetPos = hitbox.Position + Vector3.new(0, (hitbox.Size.Y / 2) + 3, 0)
+                                root.CFrame = CFrame.lookAt(targetPos, hitbox.Position)
                                 root.AssemblyLinearVelocity = Vector3.zero
 
                                 local backpack = LP:FindFirstChild("Backpack")
@@ -1040,7 +1053,7 @@ local function InitMainScript()
         end
     end)
 
-    -- HALLOWEEN BOSS FARMING
+    -- HALLOWEEN BOSS FARMING (POSICIÓN PEGADA A 3 STUDS)
     BossTab:AddHeading("Halloween Boss Farming")
     BossTab.Halloween = {
         StatusLabel = BossTab:AddLabel("Status: Waiting for Halloween Boss"),
@@ -1086,8 +1099,9 @@ local function InitMainScript()
                             local char = LP.Character
                             if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChildOfClass("Humanoid").Health > 0 then
                                 local root = char.HumanoidRootPart
-                                local headPos = hitbox.Position + Vector3.new(0, hitbox.Size.Y * 0.35, 0)
-                                root.CFrame = CFrame.lookAt(headPos + Vector3.new(0, 65, 0), headPos)
+                                -- ALTURA MÁS BAJA: Hitbox + 3 Studs directos sobre la cabeza
+                                local targetPos = hitbox.Position + Vector3.new(0, (hitbox.Size.Y / 2) + 3, 0)
+                                root.CFrame = CFrame.lookAt(targetPos, hitbox.Position)
                                 root.AssemblyLinearVelocity = Vector3.zero
 
                                 local backpack = LP:FindFirstChild("Backpack")
