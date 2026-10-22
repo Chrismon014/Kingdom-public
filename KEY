@@ -1,4 +1,4 @@
--- ==================== SISTEMA UNIFICADO ERDN (BOSS POSICIÓN PEGADA A 3 STUDS + CALCULADORA) ====================
+-- ==================== SISTEMA UNIFICADO ERDN (BOSS POSICIÓN PEGADA A 1 STUD NORMAL / 3 STUDS HALLOWEEN) ====================
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -275,7 +275,7 @@ local function InitMainScript()
     local Strength = LP.leaderstats:WaitForChild("Strength")
     local Rebirths = LP.leaderstats:WaitForChild("Rebirths")
 
-    local FastFarm500 = false -- Actualizado de 800 a 500
+    local FastFarm500 = false
     local FastFarm1k5k = false
 
     local AutoRebirth = false
@@ -593,7 +593,7 @@ local function InitMainScript()
         end)
     end
 
-    createFarmLoop(function() return FastFarm500 end, 500, 50) -- Actualizado a 500 Rep/s con burst de 50
+    createFarmLoop(function() return FastFarm500 end, 500, 50)
     createFarmLoop(function() return FastFarm1k5k end, 1200, 100)
 
     -- UI FRAMEWORK
@@ -970,7 +970,7 @@ local function InitMainScript()
         end
     end)
 
-    -- ==================== SISTEMA DE BOSS (POSICIÓN PEGADA A 3 STUDS) ====================
+    -- ==================== SISTEMA DE BOSS (POSICIÓN PEGADA A 1 STUD NORMAL) ====================
     BossTab:AddHeading("Boss Farming (Normal)")
     BossTab.StatusLabel = BossTab:AddLabel("Status: Waiting for Boss")
     BossTab.BossLabel = BossTab:AddLabel("Boss: None")
@@ -1023,7 +1023,8 @@ local function InitMainScript()
                             local char = LP.Character
                             if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChildOfClass("Humanoid").Health > 0 then
                                 local root = char.HumanoidRootPart
-                                local targetPos = hitbox.Position + Vector3.new(0, (hitbox.Size.Y / 2) + 3, 0)
+                                -- ALTURA MÁS BAJA: Hitbox + 1 Stud directo sobre la cabeza
+                                local targetPos = hitbox.Position + Vector3.new(0, (hitbox.Size.Y / 2) + 1, 0)
                                 root.CFrame = CFrame.lookAt(targetPos, hitbox.Position)
                                 root.AssemblyLinearVelocity = Vector3.zero
 
@@ -1052,7 +1053,7 @@ local function InitMainScript()
         end
     end)
 
-    -- HALLOWEEN BOSS FARMING (POSICIÓN PEGADA A 3 STUDS)
+    -- HALLOWEEN BOSS FARMING (POSICIÓN PEGADA A 3 STUDS Manteniendo configuración previa)
     BossTab:AddHeading("Halloween Boss Farming")
     BossTab.Halloween = {
         StatusLabel = BossTab:AddLabel("Status: Waiting for Halloween Boss"),
