@@ -12,27 +12,21 @@ local window = library:AddWindow("Kingdom Public", {
 local AutoFarm = window:AddTab("Farm Fast")
 AutoFarm:Show()
 
--- 1 Switch: Fuerza OP
-AutoFarm:AddSwitch("Fast Fuerza (500 Rep/s)", function(state)
-	getgenv()._AutoRepFarmEnabled = state
-	warn("[Auto Rep Farm] Estado cambiado a:", state and "ON" or "OFF")
-end)
-
--- Configuración optimizada
+-- Configuración optimizada unificada
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Stats = game:GetService("Stats")
 local PET_NAME = "Swift Samurai"
 local ROCK_NAME = "Rock5M"
 local PROTEIN_EGG_NAME = "ProteinEgg"
 local PROTEIN_EGG_INTERVAL = 30 * 60 -- 30 min
-local REPS_PER_CYCLE = 100
-local REP_DELAY = 0.01
-local ROCK_INTERVAL = 1
-local MAX_PING = 5000
 local HumanoidRootPart
 local lastProteinEggTime = 0
 local lastRockTime = 0
 local RockRef = workspace:FindFirstChild(ROCK_NAME)
+
+getgenv().ReepsPerCycle = 100
+getgenv().RepDelay = 0.01
+getgenv().MaxPing = 5000
 
 local function getPing()
 	local success, ping = pcall(function()
@@ -79,7 +73,7 @@ local function hitRock()
 	end
 end
 
--- Loop principal
+-- Loop principal unificado
 if not getgenv()._AutoRepFarmLoop then
 	getgenv()._AutoRepFarmLoop = true
 	task.spawn(function()
@@ -90,12 +84,12 @@ if not getgenv()._AutoRepFarmLoop then
 		while true do
 			if getgenv()._AutoRepFarmEnabled then
 				local ping = getPing()
-				if ping > MAX_PING then
+				if ping > (getgenv().MaxPing or 5000) then
 					warn("[Auto Rep Farm] Ping alto ("..math.floor(ping).."ms), pausando 5s...")
 					task.wait(5)
 				else
 					if LocalPlayer:FindFirstChild("muscleEvent") then
-						for i = 1, REPS_PER_CYCLE do
+						for i = 1, (getgenv().ReepsPerCycle or 100) do
 							LocalPlayer.muscleEvent:FireServer("rep")
 						end
 					end
@@ -107,7 +101,7 @@ if not getgenv()._AutoRepFarmLoop then
 						hitRock()
 						lastRockTime = tick()
 					end
-					task.wait(REP_DELAY)
+					task.wait(getgenv().RepDelay or 0.01)
 				end
 			else
 				task.wait(1)
@@ -115,212 +109,37 @@ if not getgenv()._AutoRepFarmLoop then
 		end
 	end)
 end
+
+-- Switches de Fuerza OP
+AutoFarm:AddSwitch("Fast Fuerza (500 Rep/s)", function(state)
+	getgenv()._AutoRepFarmEnabled = state
+	if state then
+		getgenv().ReepsPerCycle = 100
+		getgenv().RepDelay = 0.01
+		getgenv().MaxPing = 5000
+	end
+	warn("[Auto Rep Farm] Estado cambiado a:", state and "ON" or "OFF")
+end)
 
 AutoFarm:AddSwitch("Fast Fuerza (2K Rep/s)", function(state)
 	getgenv()._AutoRepFarmEnabled = state
+	if state then
+		getgenv().ReepsPerCycle = 500
+		getgenv().RepDelay = 0.01
+		getgenv().MaxPing = 5000
+	end
 	warn("[Auto Rep Farm] Estado cambiado a:", state and "ON" or "OFF")
 end)
-
--- Configuración optimizada
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Stats = game:GetService("Stats")
-local PET_NAME = "Swift Samurai"
-local ROCK_NAME = "Rock5M"
-local PROTEIN_EGG_NAME = "ProteinEgg"
-local PROTEIN_EGG_INTERVAL = 30 * 60 -- 30 min
-local REPS_PER_CYCLE = 500
-local REP_DELAY = 0.01
-local ROCK_INTERVAL = 1
-local MAX_PING = 5000
-local HumanoidRootPart
-local lastProteinEggTime = 0
-local lastRockTime = 0
-local RockRef = workspace:FindFirstChild(ROCK_NAME)
-
-local function getPing()
-	local success, ping = pcall(function()
-		return Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
-	end)
-	return success and ping or 999
-end
-
-local function updateCharacterRefs()
-	local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-	HumanoidRootPart = character:WaitForChild("HumanoidRootPart", 5)
-end
-
-local function equipPet()
-	local petsFolder = LocalPlayer:FindFirstChild("petsFolder")
-	if petsFolder and petsFolder:FindFirstChild("Unique") then
-		for _, pet in pairs(petsFolder.Unique:GetChildren()) do
-			if pet.Name == PET_NAME then
-				ReplicatedStorage.rEvents.equipPetEvent:FireServer("equipPet", pet)
-				break
-			end
-		end
-	end
-end
-
-local function eatProteinEgg()
-	if LocalPlayer:FindFirstChild("Backpack") then
-		for _, item in pairs(LocalPlayer.Backpack:GetChildren()) do
-			if item.Name == PROTEIN_EGG_NAME then
-				ReplicatedStorage.rEvents.eatEvent:FireServer("eat", item)
-				break
-			end
-		end
-	end
-end
-
-local function hitRock()
-	if not RockRef or not RockRef.Parent then
-		RockRef = workspace:FindFirstChild(ROCK_NAME)
-	end
-	if RockRef and HumanoidRootPart then
-		HumanoidRootPart.CFrame = RockRef.CFrame * CFrame.new(0, 0, -5)
-		ReplicatedStorage.rEvents.hitEvent:FireServer("hit", RockRef)
-	end
-end
-
--- Loop principal
-if not getgenv()._AutoRepFarmLoop then
-	getgenv()._AutoRepFarmLoop = true
-	task.spawn(function()
-		updateCharacterRefs()
-		equipPet()
-		lastProteinEggTime = tick()
-		lastRockTime = tick()
-		while true do
-			if getgenv()._AutoRepFarmEnabled then
-				local ping = getPing()
-				if ping > MAX_PING then
-					warn("[Auto Rep Farm] Ping alto ("..math.floor(ping).."ms), pausando 5s...")
-					task.wait(5)
-				else
-					if LocalPlayer:FindFirstChild("muscleEvent") then
-						for i = 1, REPS_PER_CYCLE do
-							LocalPlayer.muscleEvent:FireServer("rep")
-						end
-					end
-					if tick() - lastProteinEggTime >= PROTEIN_EGG_INTERVAL then
-						eatProteinEgg()
-						lastProteinEggTime = tick()
-					end
-					if tick() - lastRockTime >= ROCK_INTERVAL then
-						hitRock()
-						lastRockTime = tick()
-					end
-					task.wait(REP_DELAY)
-				end
-			else
-				task.wait(1)
-			end
-		end
-	end)
-end
 
 AutoFarm:AddSwitch("Fast Fuerza (20K Rep/s)", function(state)
 	getgenv()._AutoRepFarmEnabled = state
+	if state then
+		getgenv().ReepsPerCycle = 1000
+		getgenv().RepDelay = 0.005
+		getgenv().MaxPing = 10000
+	end
 	warn("[Auto Rep Farm] Estado cambiado a:", state and "ON" or "OFF")
 end)
-
--- Configuración optimizada
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Stats = game:GetService("Stats")
-local PET_NAME = "Swift Samurai"
-local ROCK_NAME = "Rock5M"
-local PROTEIN_EGG_NAME = "ProteinEgg"
-local PROTEIN_EGG_INTERVAL = 30 * 60 -- 30 min
-local REPS_PER_CYCLE = 1000
-local REP_DELAY = 0.005
-local ROCK_INTERVAL = 1
-local MAX_PING = 10000
-local HumanoidRootPart
-local lastProteinEggTime = 0
-local lastRockTime = 0
-local RockRef = workspace:FindFirstChild(ROCK_NAME)
-
-local function getPing()
-	local success, ping = pcall(function()
-		return Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
-	end)
-	return success and ping or 999
-end
-
-local function updateCharacterRefs()
-	local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-	HumanoidRootPart = character:WaitForChild("HumanoidRootPart", 5)
-end
-
-local function equipPet()
-	local petsFolder = LocalPlayer:FindFirstChild("petsFolder")
-	if petsFolder and petsFolder:FindFirstChild("Unique") then
-		for _, pet in pairs(petsFolder.Unique:GetChildren()) do
-			if pet.Name == PET_NAME then
-				ReplicatedStorage.rEvents.equipPetEvent:FireServer("equipPet", pet)
-				break
-			end
-		end
-	end
-end
-
-local function eatProteinEgg()
-	if LocalPlayer:FindFirstChild("Backpack") then
-		for _, item in pairs(LocalPlayer.Backpack:GetChildren()) do
-			if item.Name == PROTEIN_EGG_NAME then
-				ReplicatedStorage.rEvents.eatEvent:FireServer("eat", item)
-				break
-			end
-		end
-	end
-end
-
-local function hitRock()
-	if not RockRef or not RockRef.Parent then
-		RockRef = workspace:FindFirstChild(ROCK_NAME)
-	end
-	if RockRef and HumanoidRootPart then
-		HumanoidRootPart.CFrame = RockRef.CFrame * CFrame.new(0, 0, -5)
-		ReplicatedStorage.rEvents.hitEvent:FireServer("hit", RockRef)
-	end
-end
-
--- Loop principal
-if not getgenv()._AutoRepFarmLoop then
-	getgenv()._AutoRepFarmLoop = true
-	task.spawn(function()
-		updateCharacterRefs()
-		equipPet()
-		lastProteinEggTime = tick()
-		lastRockTime = tick()
-		while true do
-			if getgenv()._AutoRepFarmEnabled then
-				local ping = getPing()
-				if ping > MAX_PING then
-					warn("[Auto Rep Farm] Ping alto ("..math.floor(ping).."ms), pausando 5s...")
-					task.wait(5)
-				else
-					if LocalPlayer:FindFirstChild("muscleEvent") then
-						for i = 1, REPS_PER_CYCLE do
-							LocalPlayer.muscleEvent:FireServer("rep")
-						end
-					end
-					if tick() - lastProteinEggTime >= PROTEIN_EGG_INTERVAL then
-						eatProteinEgg()
-						lastProteinEggTime = tick()
-					end
-					if tick() - lastRockTime >= ROCK_INTERVAL then
-						hitRock()
-						lastRockTime = tick()
-					end
-					task.wait(REP_DELAY)
-				end
-			else
-				task.wait(1)
-			end
-		end
-	end)
-end
 
 -- 2 Switch: Eat Egg (30 Min)
 local autoEatEnabled = false
@@ -622,7 +441,7 @@ rebirthsFolder:AddSwitch("Auto Teleport to Muscle King", function(bool)
 	end
 end, "Teletransporte continuo al Rey Músculo")
 
-local RebirthFolder = AutoRebirth:AddFolder("Rebirth Pack")
+local RebirthFolder = AutoRebirths:AddFolder("Rebirth Pack")
 local player = game.Players.LocalPlayer
 local leaderstats = player:WaitForChild("leaderstats")
 local rebirthsStat = leaderstats:WaitForChild("Rebirths")
@@ -741,38 +560,35 @@ RebirthFolder:AddSwitch("Lock Position", function(Value)
 end)
 
 -- Titans Rebirth
-local RebirthFolder = AutoRebirths:AddFolder("Rebirth Pack Titans")
-local player = game.Players.LocalPlayer
-local leaderstats = player:WaitForChild("leaderstats")
-local rebirthsStat = leaderstats:WaitForChild("Rebirths")
-local startTime = tick()
-local sessionRebirths = rebirthsStat.Value
-local timeLabel = RebirthFolder:AddLabel("Time")
-timeLabel.TextSize = 24
-timeLabel.Font = Enum.Font.PatrickHand
-local stopwatchLabel = RebirthFolder:AddLabel("0d 0h 0m 0s")
-stopwatchLabel.TextSize = 20
-stopwatchLabel.Font = Enum.Font.PatrickHand
-RebirthFolder:AddLabel("").TextSize = 10
-local gainedLabel = RebirthFolder:AddLabel("Gained Rebirths: 0")
-gainedLabel.TextSize = 16
-gainedLabel.Font = Enum.Font.PatrickHand
+local RebirthFolderTitans = AutoRebirths:AddFolder("Rebirth Pack Titans")
+local startTimeT = tick()
+local sessionRebirthsT = rebirthsStat.Value
+local timeLabelT = RebirthFolderTitans:AddLabel("Time")
+timeLabelT.TextSize = 24
+timeLabelT.Font = Enum.Font.PatrickHand
+local stopwatchLabelT = RebirthFolderTitans:AddLabel("0d 0h 0m 0s")
+stopwatchLabelT.TextSize = 20
+stopwatchLabelT.Font = Enum.Font.PatrickHand
+RebirthFolderTitans:AddLabel("").TextSize = 10
+local gainedLabelT = RebirthFolderTitans:AddLabel("Gained Rebirths: 0")
+gainedLabelT.TextSize = 16
+gainedLabelT.Font = Enum.Font.PatrickHand
 
 task.spawn(function()
 	while task.wait(1) do
-		local elapsed = tick() - startTime
+		local elapsed = tick() - startTimeT
 		local days = math.floor(elapsed / 86400)
 		local hours = math.floor((elapsed % 86400) / 3600)
 		local minutes = math.floor((elapsed % 3600) / 60)
 		local seconds = math.floor(elapsed % 60)
-		stopwatchLabel.Text = string.format("%dd %dh %dm %ds", days, hours, minutes, seconds)
-		local gainedRebirths = rebirthsStat.Value - sessionRebirths
-		gainedLabel.Text = "Gained Rebirths: " .. tostring(gainedRebirths)
+		stopwatchLabelT.Text = string.format("%dd %dh %dm %ds", days, hours, minutes, seconds)
+		local gainedRebirths = rebirthsStat.Value - sessionRebirthsT
+		gainedLabelT.Text = "Gained Rebirths: " .. tostring(gainedRebirths)
 	end
 end)
 
-RebirthFolder:AddSwitch("Fast Rebirths", function(state)
-	getgenv().AutoFarming = state
+RebirthFolderTitans:AddSwitch("Fast Rebirths", function(state)
+	getgenv().AutoFarmingTitans = state
 	if state then
 		task.spawn(function()
 			local a = ReplicatedStorage
@@ -818,24 +634,24 @@ RebirthFolder:AddSwitch("Fast Rebirths", function(state)
 				end
 				return math.floor(baseStrength)
 			end
-			while getgenv().AutoFarming do
+			while getgenv().AutoFarmingTitans do
 				local requiredStrength = getStrengthRequiredForRebirth()
 				unequipAllPets()
 				equipPetByName("Omega Overlord")
-				while c.leaderstats.Strength.Value < requiredStrength and getgenv().AutoFarming do
+				while c.leaderstats.Strength.Value < requiredStrength and getgenv().AutoFarmingTitans do
 					for _ = 1, 10 do
 						c.muscleEvent:FireServer("rep")
 					end
 					task.wait()
 				end
-				if getgenv().AutoFarming then
+				if getgenv().AutoFarmingTitans then
 					unequipAllPets()
 					equipPetByName("Titanium Hydra")
 					local oldRebirths = c.leaderstats.Rebirths.Value
 					repeat
 						a.rEvents.rebirthRemote:InvokeServer("rebirthRequest")
 						task.wait(0.1)
-					until c.leaderstats.Rebirths.Value > oldRebirths or not getgenv().AutoFarming
+					until c.leaderstats.Rebirths.Value > oldRebirths or not getgenv().AutoFarmingTitans
 				end
 				task.wait()
 			end
@@ -843,43 +659,39 @@ RebirthFolder:AddSwitch("Fast Rebirths", function(state)
 	end
 end)
 
-RebirthFolder:AddSwitch("Lock Position", function(Value)
+RebirthFolderTitans:AddSwitch("Lock Position", function(Value)
 	if Value then
 		local currentPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-		getgenv().posLock = game:GetService("RunService").Heartbeat:Connect(function()
+		getgenv().posLockT = game:GetService("RunService").Heartbeat:Connect(function()
 			if game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
 				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = currentPos
 			end
 		end)
 	else
-		if getgenv().posLock then
-			getgenv().posLock:Disconnect()
-			getgenv().posLock = nil
+		if getgenv().posLockT then
+			getgenv().posLockT:Disconnect()
+			getgenv().posLockT = nil
 		end
 	end
 end)
 
 
--- Rebirth titans and chaos
-local RebirthFolder1 = AutoRebirths:AddFolder("Rebirth Pack Titans & Chaos")
-local player = game.Players.LocalPlayer
-local leaderstats = player:WaitForChild("leaderstats")
-local rebirthsStat = leaderstats:WaitForChild("Rebirths")
-
+-- Rebirth titans and chaos (Folder 1)
+local RebirthFolderTC1 = AutoRebirths:AddFolder("Rebirth Pack Titans & Chaos 1")
 local startTime1 = tick()
 local sessionRebirths1 = rebirthsStat.Value
 
-local timeLabel1 = RebirthFolder1:AddLabel("Time")
+local timeLabel1 = RebirthFolderTC1:AddLabel("Time")
 timeLabel1.TextSize = 24
 timeLabel1.Font = Enum.Font.PatrickHand
 
-local stopwatchLabel1 = RebirthFolder1:AddLabel("0d 0h 0m 0s")
+local stopwatchLabel1 = RebirthFolderTC1:AddLabel("0d 0h 0m 0s")
 stopwatchLabel1.TextSize = 20
 stopwatchLabel1.Font = Enum.Font.PatrickHand
 
-RebirthFolder1:AddLabel("").TextSize = 10
+RebirthFolderTC1:AddLabel("").TextSize = 10
 
-local gainedLabel1 = RebirthFolder1:AddLabel("Gained Rebirths: 0")
+local gainedLabel1 = RebirthFolderTC1:AddLabel("Gained Rebirths: 0")
 gainedLabel1.TextSize = 16
 gainedLabel1.Font = Enum.Font.PatrickHand
 
@@ -896,14 +708,13 @@ task.spawn(function()
 	end
 end)
 
-RebirthFolder1:AddSwitch("Fast Rebirths", function(state)
-	getgenv().AutoFarming1 = state
+RebirthFolderTC1:AddSwitch("Fast Rebirths", function(state)
+	getgenv().AutoFarmingTC1 = state
 	if state then
 		task.spawn(function()
 			local a = ReplicatedStorage
 			local c = LocalPlayer
 			
-			-- Función para equipar hasta 8 mascotas disponibles por nombre
 			local function equipPetByName(name)
 				local folderPets = c:FindFirstChild("petsFolder")
 				if not folderPets then return end
@@ -954,24 +765,24 @@ RebirthFolder1:AddSwitch("Fast Rebirths", function(state)
 				return math.floor(baseStrength)
 			end
 
-			while getgenv().AutoFarming1 do
+			while getgenv().AutoFarmingTC1 do
 				local requiredStrength = getStrengthRequiredForRebirth()
 				unequipAllPets()
 				equipPetByName("Swift Samurai")
-				while c.leaderstats.Strength.Value < requiredStrength and getgenv().AutoFarming1 do
+				while c.leaderstats.Strength.Value < requiredStrength and getgenv().AutoFarmingTC1 do
 					for _ = 1, 10 do
 						c.muscleEvent:FireServer("rep")
 					end
 					task.wait()
 				end
-				if getgenv().AutoFarming1 then
+				if getgenv().AutoFarmingTC1 then
 					unequipAllPets()
 					equipPetByName("Tribal Overlord")
 					local oldRebirths = c.leaderstats.Rebirths.Value
 					repeat
 						a.rEvents.rebirthRemote:InvokeServer("rebirthRequest")
 						task.wait(0.1)
-					until c.leaderstats.Rebirths.Value > oldRebirths or not getgenv().AutoFarming1
+					until c.leaderstats.Rebirths.Value > oldRebirths or not getgenv().AutoFarmingTC1
 				end
 				task.wait()
 			end
@@ -979,39 +790,39 @@ RebirthFolder1:AddSwitch("Fast Rebirths", function(state)
 	end
 end)
 
-RebirthFolder1:AddSwitch("Lock Position", function(Value)
+RebirthFolderTC1:AddSwitch("Lock Position", function(Value)
 	if Value then
 		local currentPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-		getgenv().posLock1 = game:GetService("RunService").Heartbeat:Connect(function()
+		getgenv().posLockTC1 = game:GetService("RunService").Heartbeat:Connect(function()
 			if game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
 				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = currentPos
 			end
 		end)
 	else
-		if getgenv().posLock1 then
-			getgenv().posLock1:Disconnect()
-			getgenv().posLock1 = nil
+		if getgenv().posLockTC1 then
+			getgenv().posLockTC1:Disconnect()
+			getgenv().posLockTC1 = nil
 		end
 	end
 end)
 
 
--- Rebirth Packs titans
-local RebirthFolder = AutoRebirths:AddFolder("Rebirth Pack Titans & Chaos")
+-- Rebirth Packs titans (Folder 2 - Arreglado)
+local RebirthFolderTC2 = AutoRebirths:AddFolder("Rebirth Pack Titans & Chaos 2")
 local startTime2 = tick()
 local sessionRebirths2 = rebirthsStat.Value
 
-local timeLabel2 = RebirthFolder2:AddLabel("Time")
+local timeLabel2 = RebirthFolderTC2:AddLabel("Time")
 timeLabel2.TextSize = 24
 timeLabel2.Font = Enum.Font.PatrickHand
 
-local stopwatchLabel2 = RebirthFolder2:AddLabel("0d 0h 0m 0s")
+local stopwatchLabel2 = RebirthFolderTC2:AddLabel("0d 0h 0m 0s")
 stopwatchLabel2.TextSize = 20
 stopwatchLabel2.Font = Enum.Font.PatrickHand
 
-RebirthFolder:AddLabel("").TextSize = 10
+RebirthFolderTC2:AddLabel("").TextSize = 10
 
-local gainedLabel2 = RebirthFolder2:AddLabel("Gained Rebirths: 0")
+local gainedLabel2 = RebirthFolderTC2:AddLabel("Gained Rebirths: 0")
 gainedLabel2.TextSize = 16
 gainedLabel2.Font = Enum.Font.PatrickHand
 
@@ -1028,14 +839,13 @@ task.spawn(function()
 	end
 end)
 
-RebirthFolder:AddSwitch("Fast Rebirths", function(state)
-	getgenv().AutoFarming2 = state
+RebirthFolderTC2:AddSwitch("Fast Rebirths", function(state)
+	getgenv().AutoFarmingTC2 = state
 	if state then
 		task.spawn(function()
 			local a = ReplicatedStorage
 			local c = LocalPlayer
 			
-			-- Función para equipar hasta 8 mascotas disponibles por nombre
 			local function equipPetByName(name)
 				local folderPets = c:FindFirstChild("petsFolder")
 				if not folderPets then return end
@@ -1086,24 +896,24 @@ RebirthFolder:AddSwitch("Fast Rebirths", function(state)
 				return math.floor(baseStrength)
 			end
 
-			while getgenv().AutoFarming2 do
+			while getgenv().AutoFarmingTC2 do
 				local requiredStrength = getStrengthRequiredForRebirth()
 				unequipAllPets()
 				equipPetByName("Omega Overlord")
-				while c.leaderstats.Strength.Value < requiredStrength and getgenv().AutoFarming2 do
+				while c.leaderstats.Strength.Value < requiredStrength and getgenv().AutoFarmingTC2 do
 					for _ = 1, 10 do
 						c.muscleEvent:FireServer("rep")
 					end
 					task.wait()
 				end
-				if getgenv().AutoFarming2 then
+				if getgenv().AutoFarmingTC2 then
 					unequipAllPets()
 					equipPetByName("Titanium Hydra")
 					local oldRebirths = c.leaderstats.Rebirths.Value
 					repeat
 						a.rEvents.rebirthRemote:InvokeServer("rebirthRequest")
 						task.wait(0.1)
-					until c.leaderstats.Rebirths.Value > oldRebirths or not getgenv().AutoFarming2
+					until c.leaderstats.Rebirths.Value > oldRebirths or not getgenv().AutoFarmingTC2
 				end
 				task.wait()
 			end
@@ -1111,18 +921,18 @@ RebirthFolder:AddSwitch("Fast Rebirths", function(state)
 	end
 end)
 
-RebirthFolder:AddSwitch("Lock Position", function(Value)
+RebirthFolderTC2:AddSwitch("Lock Position", function(Value)
 	if Value then
 		local currentPos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-		getgenv().posLock2 = game:GetService("RunService").Heartbeat:Connect(function()
+		getgenv().posLockTC2 = game:GetService("RunService").Heartbeat:Connect(function()
 			if game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
 				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = currentPos
 			end
 		end)
 	else
-		if getgenv().posLock2 then
-			getgenv().posLock2:Disconnect()
-			getgenv().posLock2 = nil
+		if getgenv().posLockTC2 then
+			getgenv().posLockTC2:Disconnect()
+			getgenv().posLockTC2 = nil
 		end
 	end
 end)
@@ -1634,7 +1444,6 @@ local petDropdown = pets:AddDropdown("Select Unique Pet", function(text)
 	selectedPet = text
 end)
 
--- Añadir únicamente mascotas Unique
 petDropdown:Add("Infernal Dragon (Unique)")
 petDropdown:Add("Dark Storm (Unique)")
 petDropdown:Add("Ultra Birdie (Unique)")
@@ -1705,10 +1514,10 @@ Gift:AddButton("Gift Eggs", function()
 		end
 	end
 end)
+
 -- Config
 local Config = window:AddTab("Config")
 
--- 4 Switch: Anti Lag
 Config:AddSwitch("Anti Lag", function(State)
 	local lighting = game:GetService("Lighting")
 	if State then
@@ -1754,7 +1563,6 @@ Config:AddSwitch("Anti Lag", function(State)
 	end
 end)
 
--- SWITCH PARA ACTIVAR/DESACTIVAR EL ANTI AFK
 Config:AddSwitch("Anti AFK", function(state)
 	if state then
 		if getgenv().AntiAfkExecuted and thisoneissocoldww then
